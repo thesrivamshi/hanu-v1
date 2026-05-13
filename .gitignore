@@ -48,6 +48,11 @@ build/
 *.swo
 *~
 
+# Supabase CLI
+supabase/.temp/
+supabase/.branches/
+supabase/.env
+
 # pptxgenjs scratch output
 package-lock.json
 package.json
