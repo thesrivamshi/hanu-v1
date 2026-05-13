@@ -216,9 +216,17 @@ def hanu_create_reminder(
     follow_up_rule: Optional[str] = None,
     linked_goal_id: Optional[str] = None,
 ) -> dict:
-    """Create a reminder. `when` is parsed best-effort; the original text is also kept."""
+    """Create a reminder. `when` is parsed best-effort; the original text is also kept.
+    follow_up_rule like "Re-ping after 15 min" is parsed into follow_up_interval_s for the worker."""
     try:
         scheduled_at = _try_parse_when(when)
+        # Parse the follow-up interval if reminder_worker is available.
+        follow_up_interval_s = None
+        try:
+            from reminder_worker import parse_followup_seconds  # type: ignore
+            follow_up_interval_s = parse_followup_seconds(follow_up_rule)
+        except Exception:
+            pass
         res = sb().table("reminders").insert({
             "user_id": USER_ID,
             "title": title,
@@ -232,6 +240,7 @@ def hanu_create_reminder(
             "linked_goal_id": linked_goal_id,
             "needs_confirm": needs_confirm,
             "follow_up_rule": follow_up_rule,
+            "follow_up_interval_s": follow_up_interval_s,
         }).execute()
         rid = res.data[0]["id"] if res.data else None
         log_activity("reminder_created", f"Reminder: {title}", "reminders", rid)
