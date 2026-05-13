@@ -766,6 +766,90 @@ def hanu_log_activity_freeform(
 
 
 # =============================================================================
+# AI DISCLOSURE (task 21)
+# =============================================================================
+
+DISCLOSURE_TEMPLATE = (
+    "Hi — I'm Hanu, an AI assistant {user_first} set up to help me reach them "
+    "and to manage shared family responsibilities. I'll be sending you reminders "
+    "and relaying your messages to them. Reply normally; I'll pass it on.\n\n"
+    "If you'd rather only deal with {user_first} directly, just say 'stop' and "
+    "I'll stop messaging you here.\n\n"
+)
+
+
+def _disclosure_for_user(user_first_name: str) -> str:
+    return DISCLOSURE_TEMPLATE.format(user_first=user_first_name)
+
+
+def hanu_format_with_disclosure(person_id: str, body: str) -> dict:
+    """Return the outbound message body, prefixed with a one-time disclosure if
+    this conversation hasn't disclosed yet. Also surfaces whether the person
+    has opted out (caller MUST honor opted_out and not send).
+
+    Returns {ok, opted_out, needs_disclosure, body, conversation_id}.
+    The Baileys/Hermes layer is responsible for the actual send + for stamping
+    `conversations.first_contact_disclosed_at = now()` on success.
+    """
+    try:
+        person = sb().table("people").select(
+            "name,whatsapp_number,opted_out_at"
+        ).eq("id", person_id).eq("user_id", USER_ID).single().execute().data
+        if not person:
+            return _err(f"person {person_id} not found")
+        if person.get("opted_out_at"):
+            return _ok(opted_out=True, needs_disclosure=False, body=None, conversation_id=None)
+
+        conv = sb().table("conversations").select(
+            "id,first_contact_disclosed_at"
+        ).eq("user_id", USER_ID).eq("person_id", person_id).eq(
+            "channel", "whatsapp"
+        ).limit(1).execute().data
+        conv_row = conv[0] if conv else None
+        conversation_id = conv_row["id"] if conv_row else None
+        needs_disclosure = conv_row is None or conv_row.get("first_contact_disclosed_at") is None
+
+        profile = sb().table("profiles").select("first_name").eq(
+            "id", USER_ID
+        ).single().execute().data or {}
+        user_first = profile.get("first_name", "the user")
+        out_body = (_disclosure_for_user(user_first) + body) if needs_disclosure else body
+        return _ok(
+            opted_out=False,
+            needs_disclosure=needs_disclosure,
+            body=out_body,
+            conversation_id=conversation_id,
+        )
+    except Exception as e:
+        return _err(str(e))
+
+
+def hanu_mark_disclosure_sent(conversation_id: str) -> dict:
+    try:
+        sb().table("conversations").update({
+            "first_contact_disclosed_at": now_iso(),
+        }).eq("id", conversation_id).eq("user_id", USER_ID).execute()
+        log_activity("disclosure_sent",
+                     f"First-contact disclosure marked sent on {conversation_id}",
+                     "conversations", conversation_id)
+        return _ok()
+    except Exception as e:
+        return _err(str(e))
+
+
+def hanu_opt_out_person(person_id: str) -> dict:
+    """User-initiated or 'stop'-message-driven opt-out."""
+    try:
+        sb().table("people").update({
+            "opted_out_at": now_iso(),
+        }).eq("id", person_id).eq("user_id", USER_ID).execute()
+        log_activity("person_opted_out", f"Person {person_id} opted out", "people", person_id)
+        return _ok(id=person_id)
+    except Exception as e:
+        return _err(str(e))
+
+
+# =============================================================================
 # ARCHIVAL (task 25)
 # =============================================================================
 
@@ -986,6 +1070,10 @@ _TOOL_REGISTRY = {
     # Approval rules (task 12)
     "create_approval_rule": hanu_create_approval_rule,
     "check_approval_rule": hanu_check_approval_rule,
+    # AI disclosure (task 21)
+    "format_with_disclosure": hanu_format_with_disclosure,
+    "mark_disclosure_sent": hanu_mark_disclosure_sent,
+    "opt_out_person": hanu_opt_out_person,
     # Archival (task 25)
     "search_archive": hanu_search_archive,
     "archive_old_messages_all": hanu_archive_old_messages_all,
