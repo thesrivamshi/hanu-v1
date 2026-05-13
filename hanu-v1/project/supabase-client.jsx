@@ -201,6 +201,8 @@ function shapeSettings(s) {
     mood: s.mood || "amber",
     ambient: s.ambient || "soft",
     theme: s.theme || "dark",
+    onboardedAt: s.onboarded_at || null,
+    archiveAfterDays: typeof s.archive_after_days === "number" ? s.archive_after_days : 365,
   };
 }
 

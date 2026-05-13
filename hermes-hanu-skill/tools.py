@@ -751,6 +751,7 @@ def hanu_update_setting(field: str, value: Any) -> dict:
         "follow_up_intensity", "accountability",
         "ask_before_saving", "ask_before_sharing",
         "tone", "mood", "ambient", "theme",
+        "onboarded_at", "archive_after_days",
     }
     if field not in allowed:
         return _err(f"field '{field}' is not user-updatable here")
