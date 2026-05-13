@@ -106,6 +106,7 @@ function shapeMemory(m) {
   return {
     id: m.id,
     text: m.text,
+    compiledTruth: m.compiled_truth || m.text,  // task 26: prefer compiled_truth for display
     type: _dbToUi(m.kind || "other"),
     privacy: _dbToUi(m.privacy || "private"),
     source: m.source || "",

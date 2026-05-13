@@ -92,11 +92,14 @@ The user's life is currently a blank slate — when you first start running, the
 Every tool below talks to Supabase. They handle errors and write to `activity_log` automatically.
 
 ### Memory
-- `hanu_save_memory(text, kind, privacy="private", source="conversation", pinned=False)` — explicit save.
+- `hanu_save_memory(text, kind, privacy="private", source="conversation", pinned=False, compiled_truth=None, initial_event=None)` — explicit save. Pass `compiled_truth` when you have a synthesized statement; pass `initial_event` to seed the timeline (task 26).
 - `hanu_propose_memory(text, suggested_kind, confidence, suggested_privacy="private")` — into inbox; user approves later.
 - `hanu_update_memory(id, text=None, privacy=None, pinned=None)` — correct a memory.
 - `hanu_forget_memory(id)` — soft delete (`archived=true`).
 - `hanu_search_memories(query, kind=None, privacy_max="shared_space", limit=10)` — keyword search; vector when available.
+- `hanu_read_memory(id)` — returns `{memory, timeline}`; **use this** instead of reading `text` directly when answering questions. The compiled_truth is the synthesized current understanding; timeline is the append-only evidence trail.
+- `hanu_append_memory_event(memory_id, event_text, on_date=None, source_message_id=None)` — add a new observation to an existing memory's timeline. Use when new information about a known topic comes up.
+- `hanu_recompile_memory(memory_id, new_truth)` — rewrite the compiled_truth. Use when the user explicitly corrects or supersedes the synthesized statement. Timeline stays untouched as the audit trail.
 
 ### Reminders
 - `hanu_create_reminder(title, when, recur="once", priority="normal", category="personal", person_id=None, needs_confirm=False, follow_up_rule=None)` — `when` is free text, parsed server-side.

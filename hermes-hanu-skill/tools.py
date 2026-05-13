@@ -98,6 +98,8 @@ def hanu_save_memory(
     shared_with_person_id: Optional[str] = None,
     shared_in_space_id: Optional[str] = None,
     sensitive_category: Optional[str] = None,
+    compiled_truth: Optional[str] = None,
+    initial_event: Optional[str] = None,
 ) -> dict:
     """Save a memory explicitly. Use when the user said 'remember X' or 'save this'.
     privacy is one of {private, ask_share, shared_with_person, shared_in_space, never_share}.
@@ -109,6 +111,7 @@ def hanu_save_memory(
         res = sb().table("memories").insert({
             "user_id": USER_ID,
             "text": text,
+            "compiled_truth": compiled_truth or text,
             "kind": kind,
             "privacy": _normalize_privacy(privacy),
             "sensitive_category": sensitive_category,
@@ -119,8 +122,78 @@ def hanu_save_memory(
             "shared_in_space_id": shared_in_space_id,
         }).execute()
         mid = res.data[0]["id"] if res.data else None
+        if mid and initial_event:
+            try:
+                sb().table("memory_timeline_events").insert({
+                    "user_id": USER_ID,
+                    "memory_id": mid,
+                    "event_text": initial_event,
+                }).execute()
+            except Exception:
+                pass  # best-effort; the memory itself is saved
         log_activity("memory_saved", f"Saved memory: {text[:80]}", "memories", mid)
         return _ok(id=mid)
+    except Exception as e:
+        return _err(str(e))
+
+
+# Compiled-truth + timeline events (task 26)
+
+def hanu_append_memory_event(
+    memory_id: str,
+    event_text: str,
+    on_date: Optional[str] = None,
+    source_message_id: Optional[str] = None,
+) -> dict:
+    """Append an event to a memory's timeline. Never edits compiled_truth."""
+    try:
+        from datetime import date as _date
+        d = on_date or _date.today().isoformat()
+        res = sb().table("memory_timeline_events").insert({
+            "user_id": USER_ID,
+            "memory_id": memory_id,
+            "on_date": d,
+            "event_text": event_text,
+            "source_message_id": source_message_id,
+        }).execute()
+        eid = res.data[0]["id"] if res.data else None
+        log_activity("memory_event_appended",
+                     f"Event on {memory_id}: {event_text[:80]}",
+                     "memory_timeline_events", eid)
+        return _ok(id=eid)
+    except Exception as e:
+        return _err(str(e))
+
+
+def hanu_recompile_memory(memory_id: str, new_truth: str) -> dict:
+    """Rewrite compiled_truth for a memory. Timeline events are untouched."""
+    try:
+        sb().table("memories").update({
+            "compiled_truth": new_truth,
+            "updated_at": now_iso(),
+        }).eq("id", memory_id).eq("user_id", USER_ID).execute()
+        log_activity("memory_recompiled",
+                     f"Recompiled {memory_id}: {new_truth[:80]}",
+                     "memories", memory_id)
+        return _ok(id=memory_id)
+    except Exception as e:
+        return _err(str(e))
+
+
+def hanu_read_memory(memory_id: str) -> dict:
+    """Return compiled_truth + ordered timeline (oldest first). Use this
+    instead of reading memories.text directly when answering questions."""
+    try:
+        m = sb().table("memories").select(
+            "id,text,compiled_truth,kind,privacy,source,source_type,sensitive_category,"
+            "pinned,shared_with_person_id,shared_in_space_id,created_at,updated_at"
+        ).eq("id", memory_id).eq("user_id", USER_ID).single().execute().data
+        events = sb().table("memory_timeline_events").select(
+            "id,on_date,event_text,source_message_id,created_at"
+        ).eq("memory_id", memory_id).eq("user_id", USER_ID).order(
+            "on_date", desc=False
+        ).execute().data or []
+        return _ok(memory=m, timeline=events)
     except Exception as e:
         return _err(str(e))
 
@@ -1045,6 +1118,10 @@ _TOOL_REGISTRY = {
     "update_memory": hanu_update_memory,
     "forget_memory": hanu_forget_memory,
     "search_memories": hanu_search_memories,
+    # Compiled-truth + timeline (task 26)
+    "append_memory_event": hanu_append_memory_event,
+    "recompile_memory": hanu_recompile_memory,
+    "read_memory": hanu_read_memory,
     # Reminders
     "create_reminder": hanu_create_reminder,
     "mark_reminder": hanu_mark_reminder,
