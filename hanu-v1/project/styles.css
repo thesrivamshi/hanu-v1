@@ -387,6 +387,11 @@ body {
 .surface.tight { padding: 16px; }
 .surface.flush { padding: 0; overflow: hidden; }
 
+/* Reusable empty state */
+.empty-state { padding: 40px 24px; text-align: center; color: var(--ink-60); display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.empty-state .empty-title { margin: 4px 0 0 0; font-weight: 600; color: var(--ink-100); font-size: 15px; }
+.empty-state .empty-body { margin: 0; font-size: 13.5px; line-height: 1.55; max-width: 480px; }
+
 /* Headings */
 .page-head {
   display: flex; align-items: flex-end; justify-content: space-between;

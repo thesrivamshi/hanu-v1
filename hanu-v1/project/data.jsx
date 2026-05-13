@@ -38,7 +38,7 @@ const HANU = {
   conflicts: [],
 
   family: {
-    name: "Battini Family",
+    name: "",  // populated when the user names the space via WhatsApp
     members: [],
     sharedReminders: [],
     sharedLoops: [],

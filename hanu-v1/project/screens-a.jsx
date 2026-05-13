@@ -10,6 +10,17 @@ function TodayScreen({ openCapture, openAsk, openGoalDetail, openApproval, openC
   const inbox = HANU.memoryInbox.slice(0, 2);
   const copy = TONE_COPY[tone] || TONE_COPY.firm;
 
+  // Deep-empty: no data at all anywhere. We hide the "Suggest" card in this state
+  // because its buttons are decorative (no real onClick) and would be misleading.
+  const deepEmpty =
+    HANU.people.length === 0 &&
+    HANU.memories.length === 0 &&
+    HANU.goals.length === 0 &&
+    HANU.reminders.length === 0 &&
+    HANU.loops.length === 0 &&
+    HANU.promises.length === 0 &&
+    HANU.decisions.length === 0;
+
   const now = new Date();
   const hour = now.getHours();
   const part = hour < 5 ? "Still up" : hour < 12 ? "Morning" : hour < 17 ? "Afternoon" : hour < 21 ? "Evening" : "Late evening";
@@ -63,18 +74,20 @@ function TodayScreen({ openCapture, openAsk, openGoalDetail, openApproval, openC
           </div>
         )}
 
-        <div className="suggest">
-          <div className="badge">H</div>
-          <div className="flex-1">
-            <div className="who">{copy.suggestionWho}</div>
-            <div className="msg">{copy.suggestionMsg}</div>
-            <div className="actions">
-              <button className="btn primary sm">{copy.suggestPrimary}</button>
-              <button className="btn ghost sm">{copy.suggestSecondary}</button>
-              <button className="btn ghost sm">{copy.suggestThird}</button>
+        {!deepEmpty && (
+          <div className="suggest">
+            <div className="badge">H</div>
+            <div className="flex-1">
+              <div className="who">{copy.suggestionWho}</div>
+              <div className="msg">{copy.suggestionMsg}</div>
+              <div className="actions">
+                <button className="btn primary sm">{copy.suggestPrimary}</button>
+                <button className="btn ghost sm">{copy.suggestSecondary}</button>
+                <button className="btn ghost sm">{copy.suggestThird}</button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Composer + Ask Hanu */}
@@ -120,7 +133,12 @@ function TodayScreen({ openCapture, openAsk, openGoalDetail, openApproval, openC
             <button className="btn ghost sm">View all</button>
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
-            {reminders.map(r => (
+            {reminders.length === 0 ? (
+              <EmptyState
+                icon="clock"
+                body={`Nothing scheduled. Tell Hanu "remind me to ..." on WhatsApp.`}
+              />
+            ) : reminders.map(r => (
               <div className="list-row" key={r.id}>
                 <div className="check"></div>
                 <div>
@@ -148,6 +166,12 @@ function TodayScreen({ openCapture, openAsk, openGoalDetail, openApproval, openC
             <button className="btn ghost sm">Open queue</button>
           </div>
           <div className="col gap-12">
+            {approvals.length === 0 && (
+              <EmptyState
+                icon="shield"
+                body="No approvals pending. Family members will appear here when they ask Hanu something."
+              />
+            )}
             {approvals.map(a => {
               const p = personById(a.from);
               return (
@@ -180,7 +204,12 @@ function TodayScreen({ openCapture, openAsk, openGoalDetail, openApproval, openC
             <button className="btn ghost sm">All loops</button>
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
-            {loops.map(l => (
+            {loops.length === 0 ? (
+              <EmptyState
+                icon="loop"
+                body="No open loops. As you tell Hanu about unfinished things, they'll appear here."
+              />
+            ) : loops.map(l => (
               <div className="list-row" key={l.id}>
                 <div className={`pulse ${l.state === "overdue" ? "crit" : ""}`}></div>
                 <div>
@@ -207,6 +236,12 @@ function TodayScreen({ openCapture, openAsk, openGoalDetail, openApproval, openC
             <button className="btn ghost sm">Vault</button>
           </div>
           <div className="col gap-12">
+            {inbox.length === 0 && (
+              <EmptyState
+                icon="vault"
+                body="Nothing to review. Hanu proposes memories here when it notices something worth keeping."
+              />
+            )}
             {inbox.map(m => (
               <div className="mem-card" key={m.id}>
                 <div className="quote">"{m.text}"</div>
@@ -220,7 +255,9 @@ function TodayScreen({ openCapture, openAsk, openGoalDetail, openApproval, openC
                 </div>
               </div>
             ))}
-            <button className="btn ghost" style={{ alignSelf: "flex-start" }}>Open all 12 suggestions</button>
+            {HANU.memoryInbox.length > 0 && (
+              <button className="btn ghost" style={{ alignSelf: "flex-start" }}>Open all {HANU.memoryInbox.length} suggestions</button>
+            )}
           </div>
         </div>
       </div>
@@ -275,11 +312,11 @@ function GoalsScreen({ openGoalDetail, openCreate }) {
       </div>
 
       {goals.length === 0 && (
-        <div className="surface" style={{ textAlign: "center", padding: "40px 20px" }}>
-          <div className="muted" style={{ fontSize: 14 }}>
-            No goals yet.<br/>
-            Tell Hanu on WhatsApp — e.g. <em>"Set a goal: post one post per day."</em>
-          </div>
+        <div className="surface">
+          <EmptyState
+            icon="target"
+            body={`No goals yet. Tell Hanu "set a goal to ..." on WhatsApp.`}
+          />
         </div>
       )}
 
@@ -375,7 +412,13 @@ function RemindersScreen({ openCreate }) {
         <div className="span-3"><div className="kpi"><div className="label">Today</div><div className="value">{today.length}</div><div className="delta">1 non-negotiable</div></div></div>
         <div className="span-3"><div className="kpi"><div className="label">Awaiting confirm</div><div className="value amber">{confirms.length}</div><div className="delta warn">Hanu will re-ping</div></div></div>
         <div className="span-3"><div className="kpi"><div className="label">Missed (7d)</div><div className="value crit">2</div><div className="delta crit">Below your bar</div></div></div>
-        <div className="span-3"><div className="kpi"><div className="label">Family-linked</div><div className="value">4</div><div className="delta">Geeta · Ramesh</div></div></div>
+        <div className="span-3"><div className="kpi"><div className="label">Family-linked</div><div className="value">{HANU.goals.filter(g => g.family_critical).length}</div><div className="delta">{(() => {
+          const familyRelations = ["mother","father","sister","brother","son","daughter","spouse","wife","husband","partner","parent","sibling","child"];
+          const familyNames = (HANU.people || [])
+            .filter(p => p.id !== "self" && p.relationship && familyRelations.includes(String(p.relationship).toLowerCase()))
+            .map(p => p.name.split(" ")[0]);
+          return familyNames.length ? familyNames.slice(0, 3).join(" · ") : "—";
+        })()}</div></div></div>
       </div>
 
       <div className="filter-strip">
@@ -397,7 +440,12 @@ function RemindersScreen({ openCreate }) {
           <span className="text-mono dim" style={{ fontSize: 11 }}>{list.length} items</span>
         </div>
         <div>
-          {list.length === 0 && <div className="muted" style={{ padding: 28, textAlign: "center" }}>Nothing here.</div>}
+          {list.length === 0 && (
+            <EmptyState
+              icon="bell"
+              body={`No reminders yet. Tell Hanu "remind me to ..." on WhatsApp.`}
+            />
+          )}
           {list.map(r => (
             <div className="list-row" key={r.id} style={{ borderRadius: 0 }}>
               <div className="check"></div>
@@ -471,6 +519,14 @@ function LoopsScreen() {
       </div>
 
       <div className="col gap-12">
+        {filtered.length === 0 && (
+          <div className="surface">
+            <EmptyState
+              icon="loop"
+              body="No open loops yet. Hanu captures unfinished items from your conversations."
+            />
+          </div>
+        )}
         {filtered.map(l => (
           <div className="surface tight" key={l.id} style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 18, alignItems: "center" }}>
             <div className={`pulse ${l.state === "overdue" ? "crit" : l.state === "waiting" ? "" : ""}`}></div>

@@ -32,11 +32,11 @@ function PromisesScreen() {
       </div>
 
       {p.length === 0 && (
-        <div className="surface" style={{ textAlign: "center", padding: "40px 20px" }}>
-          <div className="muted" style={{ fontSize: 14 }}>
-            No promises tracked yet.<br/>
-            Tell Hanu — e.g. <em>"I promised mom I'll call her on Friday."</em>
-          </div>
+        <div className="surface">
+          <EmptyState
+            icon="ring"
+            body={`No promises yet. Tell Hanu "I promised X to ..." on WhatsApp.`}
+          />
         </div>
       )}
 
@@ -103,6 +103,15 @@ function DecisionsScreen() {
         </div>
       </div>
 
+      {d.length === 0 && (
+        <div className="surface">
+          <EmptyState
+            icon="book"
+            body={`No decisions logged yet. Tell Hanu "I decided to ..." on WhatsApp.`}
+          />
+        </div>
+      )}
+
       <div className="col gap-12">
         {d.filter(filter).map(x => (
           <div key={x.id} className="decision-card">
@@ -162,7 +171,7 @@ function ReviewsScreen({ openMissReview }) {
               {c.state.done ? <Chip tone="good dot">Done · {c.time}</Chip> : <Chip tone="amber dot">Pending · {c.time}</Chip>}
             </div>
             <div className="text-serif" style={{ fontSize: 18, lineHeight: 1.4, margin: "10px 0 0" }}>
-              {c.state.note || <span className="muted" style={{ fontStyle: "italic" }}>Hanu will ask three short questions when this slot arrives.</span>}
+              {c.state.note || <span className="muted" style={{ fontStyle: "italic" }}>Mark this slot done when you've reflected. Hanu can prompt you on WhatsApp.</span>}
             </div>
             <div className="mt-16">
               {c.state.done ? <button className="btn ghost sm">Re-open</button> : <button className="btn primary sm" onClick={() => setReviewModal(true)}>Start now</button>}
@@ -371,7 +380,7 @@ function SettingsScreen() {
               <div className="row-between" key={c}>
                 <div>
                   <div style={{ fontSize: 14, textTransform: "capitalize" }}>{c}</div>
-                  <div className="muted" style={{ fontSize: 12.5 }}>{c === "whatsapp" ? "Used for Father's confirmations." : c === "app" ? "In-app only." : c === "email" ? "Daily digest." : "SMS for non-negotiables only."}</div>
+                  <div className="muted" style={{ fontSize: 12.5 }}>{c === "whatsapp" ? "Used for managed-profile confirmations." : c === "app" ? "In-app only." : c === "email" ? "Daily digest." : "SMS for non-negotiables only."}</div>
                 </div>
                 <Switch on={channels[c]} onClick={() => setChannels({ ...channels, [c]: !channels[c] })}/>
               </div>

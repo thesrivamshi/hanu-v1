@@ -122,19 +122,11 @@ function AskHanuModal({ onClose }) {
 
         {answered && (
           <div className="mt-16 col gap-16">
-            <div className="suggest" style={{ margin: 0 }}>
-              <div className="badge">H</div>
-              <div className="flex-1">
-                <div className="who">Hanu</div>
-                <div className="msg">You made three promises to Aman in the last 7 days: send pricing deck (due Fri 18:00), share founder agreement counter (waiting on him), and a verbal "yes, by next week" on writing the FAQ. Two are still open.</div>
-              </div>
-            </div>
-            <div className="col gap-8">
-              <div className="eyebrow">Sources</div>
-              <div className="mem-card"><div className="quote">"Send pricing deck — due Friday 18:00"</div><div className="src">Promise · captured May 8 from Slack thread</div></div>
-              <div className="mem-card"><div className="quote">"Aman to send signed founder agreement"</div><div className="src">Open loop · waiting · 11 days old</div></div>
-              <div className="mem-card"><div className="quote">"I'll write the FAQ next week."</div><div className="src">From voice note · May 9</div></div>
-            </div>
+            <EmptyState
+              icon="sparkle"
+              title="Nothing here yet."
+              body="Tell Hanu about something on WhatsApp — promises, decisions, reminders. Once there's memory to search, your answers will appear here with sources."
+            />
           </div>
         )}
 
@@ -154,7 +146,12 @@ function CreateGoalModal({ onClose }) {
   const [commitment, setCommitment] = React.useState(4);
   const [priority, setPriority] = React.useState("non-negotiable");
   const [promiseTo, setPromiseTo] = React.useState("Self");
-  const [title, setTitle] = React.useState("Walk 30 minutes every day");
+  const [title, setTitle] = React.useState("");
+
+  // Build "Promise to" segment options dynamically from family-relation people.
+  // Falls back to a Self-only option when there's nobody added yet.
+  const familyPeople = (HANU.people || []).filter(p => p.id !== "self" && (p.spaces || []).some(s => s.includes("Family")));
+  const promiseToOptions = ["Self", ...familyPeople.map(p => p.name.split(" (")[0])];
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -176,7 +173,7 @@ function CreateGoalModal({ onClose }) {
 
           <div className="field">
             <label>Why does this matter</label>
-            <textarea className="textarea" placeholder="Hanu will remind you of this on hard days. Be honest." defaultValue="I want to feel like my body keeps up with my mind. I get more anxious when I don't move."/>
+            <textarea className="textarea" placeholder="Hanu will remind you of this on hard days. Be honest."/>
           </div>
 
           <div className="grid-12">
@@ -189,7 +186,7 @@ function CreateGoalModal({ onClose }) {
             <div className="span-6">
               <div className="field">
                 <label>Promise to</label>
-                <Seg options={["Self", "Mother", "Aman", "Ishita"]} value={promiseTo} onChange={setPromiseTo}/>
+                <Seg options={promiseToOptions} value={promiseTo} onChange={setPromiseTo}/>
               </div>
             </div>
           </div>
@@ -214,20 +211,20 @@ function CreateGoalModal({ onClose }) {
 
           <div className="field">
             <label>Daily action</label>
-            <input className="input" defaultValue="30 min walk, morning preferred"/>
+            <input className="input" placeholder="What you'll do each day, in one line."/>
           </div>
 
           <div className="grid-12">
             <div className="span-6">
               <div className="field">
                 <label>Recovery rule (if missed)</label>
-                <input className="input" defaultValue="Do 10 min — show up tomorrow."/>
+                <input className="input" placeholder="The smaller version you'll still do — to keep the streak alive."/>
               </div>
             </div>
             <div className="span-6">
               <div className="field">
                 <label>Daily check-in time</label>
-                <input className="input" defaultValue="21:00"/>
+                <input className="input" placeholder="e.g. 21:00"/>
               </div>
             </div>
           </div>
@@ -250,6 +247,10 @@ function CreateReminderModal({ onClose }) {
   const [needsConfirm, setNeedsConfirm] = React.useState(true);
   const [followUp, setFollowUp] = React.useState(true);
 
+  // Dynamic "Linked person" options from HANU.people (Self-only fallback when empty).
+  const peopleNames = (HANU.people || []).filter(p => p.id !== "self").map(p => p.name.split(" (")[0]);
+  const linkedPersonOptions = ["—", ...peopleNames];
+
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal wide" onClick={e => e.stopPropagation()}>
@@ -265,12 +266,12 @@ function CreateReminderModal({ onClose }) {
         <div className="col gap-16">
           <div className="field">
             <label>Remind me to</label>
-            <input className="input" defaultValue="Confirm Dr. Mehta appointment for Father"/>
+            <input className="input" placeholder="e.g. Call the doctor's office to confirm tomorrow's slot."/>
           </div>
 
           <div className="grid-12">
             <div className="span-4">
-              <div className="field"><label>When</label><input className="input" defaultValue="Today, 11:30"/></div>
+              <div className="field"><label>When</label><input className="input" placeholder="e.g. Today, 11:30"/></div>
             </div>
             <div className="span-4">
               <div className="field"><label>Recur</label>
@@ -288,7 +289,7 @@ function CreateReminderModal({ onClose }) {
             </div>
             <div className="span-6">
               <div className="field"><label>Linked person</label>
-                <Seg options={["—","Mother","Father","Aman","Ishita"]} value="Father" onChange={()=>{}}/>
+                <Seg options={linkedPersonOptions} value="—" onChange={()=>{}}/>
               </div>
             </div>
           </div>
@@ -335,16 +336,16 @@ function AddPersonModal({ onClose }) {
         <div className="modal-head">
           <div>
             <div className="eyebrow">Add a person</div>
-            <h2>Add Father as a managed family profile.</h2>
-            <p>Managed profiles don't have their own Hanu — you set the tone, reminders flow through a channel he uses.</p>
+            <h2>Add someone to your circle.</h2>
+            <p>Managed profiles don't have their own Hanu — you set the tone, reminders flow through a channel they use.</p>
           </div>
           <button className="icon-btn" onClick={onClose}><Icon name="x"/></button>
         </div>
 
         <div className="col gap-16">
           <div className="grid-12">
-            <div className="span-6"><div className="field"><label>Name</label><input className="input" defaultValue="Ramesh Battini"/></div></div>
-            <div className="span-6"><div className="field"><label>Relationship</label><input className="input" defaultValue="Father"/></div></div>
+            <div className="span-6"><div className="field"><label>Name</label><input className="input" placeholder="Full name"/></div></div>
+            <div className="span-6"><div className="field"><label>Relationship</label><input className="input" placeholder="e.g. Mother, Father, Partner, Friend"/></div></div>
           </div>
 
           <div className="field">
@@ -365,9 +366,9 @@ function AddPersonModal({ onClose }) {
           </div>
 
           <div className="field">
-            <label>Reach him via</label>
+            <label>Reach them via</label>
             <Seg options={["whatsapp","sms","email","app"]} value={channel} onChange={setChannel}/>
-            <div className="muted" style={{ fontSize: 12.5, marginTop: 6 }}>Father checks WhatsApp. We'll send confirmations there with a soft tone and emoji.</div>
+            <div className="muted" style={{ fontSize: 12.5, marginTop: 6 }}>Pick the channel they actually check. Hanu will send confirmations there with the tone you set below.</div>
           </div>
 
           <div className="grid-12">
@@ -400,6 +401,8 @@ function AddPersonModal({ onClose }) {
 
 // ============================================================ Approval detail (Flow 3)
 function ApprovalDetailModal({ id, onClose }) {
+  // NOTE (out of scope): if HANU.approvals is empty this will throw — but the modal
+  // is only opened from rows in the approvals queue, so it's defensive only.
   const a = HANU.approvals.find(x => x.id === id) || HANU.approvals[0];
   const p = personById(a.from);
 
@@ -419,18 +422,18 @@ function ApprovalDetailModal({ id, onClose }) {
           <div className="span-7 col gap-12">
             <div className="surface tight">
               <div className="eyebrow">Reply with a limited answer</div>
-              <textarea className="textarea mt-8" defaultValue="Aarav is free after 19:00 tomorrow. He'd prefer to confirm tomorrow morning."/>
+              <textarea className="textarea mt-8" placeholder="Write a reply that answers the question without revealing more than you want to share."/>
               <div className="row gap-8 mt-8">
                 <Chip dot>Doesn't reveal calendar</Chip>
-                <Chip dot>Doesn't reveal who else he's seeing</Chip>
+                <Chip dot>Doesn't reveal what else is going on</Chip>
               </div>
             </div>
             <div className="surface tight">
               <div className="eyebrow">Or pick one</div>
               <div className="col gap-8 mt-8">
                 <button className="btn ghost" style={{ justifyContent: "flex-start" }}>"Yes, free after 19:00." (limited)</button>
-                <button className="btn ghost" style={{ justifyContent: "flex-start" }}>"I'll ask Aarav and get back to you." (defer)</button>
-                <button className="btn ghost" style={{ justifyContent: "flex-start" }}>"He's busy tomorrow." (vague no)</button>
+                <button className="btn ghost" style={{ justifyContent: "flex-start" }}>{`"I'll ask ${HANU.user.name} and get back to you." (defer)`}</button>
+                <button className="btn ghost" style={{ justifyContent: "flex-start" }}>"Busy tomorrow." (vague no)</button>
               </div>
             </div>
           </div>

@@ -52,6 +52,12 @@ function MemoryScreen({ openMemoryDetail }) {
           <Tabs items={[{value:"cards",label:"Cards"},{value:"compact",label:"Compact"}]} value={view} onChange={setView}/>
         </div>
         <div className="col gap-12">
+          {HANU.memoryInbox.length === 0 && (
+            <EmptyState
+              icon="sparkle"
+              body="Nothing to review yet."
+            />
+          )}
           {HANU.memoryInbox.map(m => (
             <div key={m.id} style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 14, alignItems: "center", padding: "12px 4px", borderTop: "1px solid var(--hairline)" }}>
               <div className="brand-mark" style={{ width: 30, height: 30, fontSize: 17 }}>H</div>
@@ -89,6 +95,15 @@ function MemoryScreen({ openMemoryDetail }) {
           <Chip tone="crit dot">Sensitive</Chip>
         </div>
       </div>
+
+      {mems.length === 0 && (
+        <div className="surface">
+          <EmptyState
+            icon="vault"
+            body="No memories yet. Hanu remembers what you tell it on WhatsApp."
+          />
+        </div>
+      )}
 
       <div className="grid-12">
         {mems.filter(filter).map(m => (
@@ -157,6 +172,15 @@ function PeopleScreen({ openPersonDetail, openAddPerson }) {
         </div>
       </div>
 
+      {people.length === 0 && (
+        <div className="surface">
+          <EmptyState
+            icon="people"
+            body={`No people yet. Tell Hanu "add my mom, her name is ..." on WhatsApp.`}
+          />
+        </div>
+      )}
+
       <div className="grid-12">
         {people.filter(filter).map(p => (
           <div key={p.id} className="span-6 person-card" onClick={() => openPersonDetail(p.id)}>
@@ -213,6 +237,25 @@ function PeopleScreen({ openPersonDetail, openAddPerson }) {
 function FamilyScreen({ openPersonDetail }) {
   const fam = HANU.family;
   const members = fam.members.map(personById);
+
+  // Whole-screen empty state when the user hasn't named the family space yet.
+  if (!fam.name) {
+    return (
+      <div className="col gap-16">
+        <PageHead
+          eyebrow="Family space"
+          title="Your <em>shared space</em>."
+          sub="Every person has their own private Hanu. The Family Space is shared — only family-relevant memory lives here. Private memory remains private."
+        />
+        <div className="surface">
+          <EmptyState
+            icon="hearth"
+            body={`No family space yet. Tell Hanu "set up the family space, my last name is ..." on WhatsApp.`}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="col gap-16">
@@ -277,10 +320,10 @@ function FamilyScreen({ openPersonDetail }) {
               </div>
             </div>
           ) : (
-            <div className="muted" style={{ padding: "40px 12px", fontSize: 14, textAlign: "center" }}>
-              No family members added yet.<br/>
-              Tell Hanu on WhatsApp — e.g. <em>"Add my mom, her name is Geeta, her WhatsApp is +91…"</em>
-            </div>
+            <EmptyState
+              icon="people"
+              body={`No family members yet. Tell Hanu "add my mom, her name is ..." on WhatsApp.`}
+            />
           )}
         </div>
       </div>
@@ -390,11 +433,11 @@ function ApprovalScreen({ openApproval }) {
       </div>
 
       {all.length === 0 && (
-        <div className="surface" style={{ textAlign: "center", padding: "40px 20px" }}>
-          <div className="muted" style={{ fontSize: 14 }}>
-            Nothing waiting for your approval.<br/>
-            When someone messages Hanu about you, requests will appear here.
-          </div>
+        <div className="surface">
+          <EmptyState
+            icon="shield"
+            body="No approval requests yet."
+          />
         </div>
       )}
 

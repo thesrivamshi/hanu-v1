@@ -134,4 +134,13 @@ const Bar = ({ value, max = 100, tone = "" }) => (
 
 const personById = (id) => HANU.people.find(p => p.id === id);
 
-Object.assign(window, { Icon, Chip, PriorityChip, Avatar, Switch, Seg, Tabs, PageHead, Spark, StreakBar, Bar, personById });
+// Reusable empty-state block for surfaces with no data yet.
+const EmptyState = ({ title, body, icon = "sparkle" }) => (
+  <div className="empty-state">
+    <Icon name={icon} size={28} />
+    {title ? <h3 className="empty-title">{title}</h3> : null}
+    <p className="empty-body">{body}</p>
+  </div>
+);
+
+Object.assign(window, { Icon, Chip, PriorityChip, Avatar, Switch, Seg, Tabs, PageHead, Spark, StreakBar, Bar, personById, EmptyState });
