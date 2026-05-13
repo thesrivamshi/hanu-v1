@@ -52,7 +52,8 @@ const HANU = {
       evening: { done: false, note: "" },
     },
     weeklyMisses: [],
-    failureReasons: ["forgot", "tired", "avoided", "overplanned", "blocked by someone", "wrong time", "task too big", "no longer important"],
+    // Canonical DB enum values (public.goal_failure_reason). UI labels in FAILURE_REASON_LABELS below.
+    failureReasons: ["forgot", "tired", "avoided", "overplanned", "no_time", "blocked", "wrong_time", "too_big", "not_important_anymore"],
   },
 
   settings: {
@@ -122,5 +123,19 @@ const TONE_COPY = {
   },
 };
 
+// UI-friendly labels for the canonical failure-reason enum values.
+const FAILURE_REASON_LABELS = {
+  forgot: "Forgot",
+  tired: "Too tired",
+  avoided: "Avoided",
+  overplanned: "Overplanned",
+  no_time: "No time",
+  blocked: "Blocked by someone",
+  wrong_time: "Wrong time",
+  too_big: "Too big",
+  not_important_anymore: "Not important anymore",
+};
+
 window.TONE_COPY = TONE_COPY;
+window.FAILURE_REASON_LABELS = FAILURE_REASON_LABELS;
 window.HANU = HANU;

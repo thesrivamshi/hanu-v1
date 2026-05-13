@@ -265,6 +265,13 @@ def hanu_create_goal(
         return _err(str(e))
 
 
+_VALID_GOAL_STATUSES = {"done", "missed", "skipped"}
+_VALID_FAILURE_REASONS = {
+    "forgot", "tired", "avoided", "overplanned", "no_time",
+    "blocked", "wrong_time", "too_big", "not_important_anymore",
+}
+
+
 def hanu_log_goal_completion(
     goal_id: str,
     status: str,
@@ -272,7 +279,13 @@ def hanu_log_goal_completion(
     note: Optional[str] = None,
     on_date: Optional[str] = None,
 ) -> dict:
-    """status: done | missed | skipped."""
+    """status: done | missed | skipped. reason (when status=missed): one of the 9
+    PRD failure reasons (forgot, tired, avoided, overplanned, no_time, blocked,
+    wrong_time, too_big, not_important_anymore)."""
+    if status not in _VALID_GOAL_STATUSES:
+        return _err(f"status must be one of {sorted(_VALID_GOAL_STATUSES)}; got {status!r}")
+    if reason is not None and reason not in _VALID_FAILURE_REASONS:
+        return _err(f"reason must be one of {sorted(_VALID_FAILURE_REASONS)}; got {reason!r}")
     try:
         from datetime import date as _date
         d = on_date or _date.today().isoformat()
