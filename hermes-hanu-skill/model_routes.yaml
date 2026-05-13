@@ -1,0 +1,29 @@
+# Hanu model routing table.
+# Per tasks/24-model-abstraction.md.
+#
+# The agent's gateway picks `model` + `max_tokens` based on the inbound
+# message's intent (classify_intent in router.py). Unmatched intents fall
+# back to `default`. The route table is data, not code; tune by editing.
+
+default: gpt-5.4-mini
+
+routes:
+  # Routine CRUD: short, deterministic. Small model.
+  - match: { intent: routine_crud }
+    model: gpt-5.4-mini
+    max_tokens: 256
+
+  # User dumps a messy thought; agent parses for items. Still small.
+  - match: { intent: thought_dump }
+    model: gpt-5.4-mini
+    max_tokens: 1024
+
+  # Q&A search-then-summarize over the user's memories.
+  - match: { intent: ask_hanu }
+    model: gpt-5.4
+    max_tokens: 2048
+
+  # Weekly review / recovery conversation. Premium tier.
+  - match: { intent: synthesis }
+    model: gpt-5.4
+    max_tokens: 4096
