@@ -100,12 +100,13 @@ function LoginScreen() {
     setSending(true);
     setError(null);
     try {
-      const { error: otpError } = await window.sb.auth.signInWithOtp({
-        email: trimmed,
-        options: { emailRedirectTo: window.location.origin },
-      });
-      if (otpError) throw otpError;
-      setSent(true);
+      const result = await window.hanu.sendMagicLink(trimmed);
+      if (result && result.ok) {
+        setSent(true);
+      } else {
+        const msg = (result && result.error) || "Could not send the magic link.";
+        setError(msg);
+      }
     } catch (err) {
       console.error("[hanu] magic-link request failed", err);
       setError(err.message || String(err));

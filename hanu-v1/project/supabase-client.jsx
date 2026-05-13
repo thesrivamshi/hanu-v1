@@ -307,6 +307,40 @@ window.hanuSubscribe = hanuSubscribe;
 // Write helpers (used by modals). Names mirror Hermes' hanu_call tools.
 // -----------------------------------------------------------------------------
 window.hanu = {
+  // Auth helpers — magic-link only. Exposed here so UI components (LoginScreen,
+  // sidebar sign-out, etc.) can use a single namespace instead of poking at the
+  // raw supabase client.
+  //
+  // Note: these two helpers return `{ ok, error }` rather than the raw
+  // Supabase `{ data, error }` PostgrestResponse used by the table helpers
+  // below — auth responses carry no useful `data` payload to surface.
+  async sendMagicLink(email) {
+    try {
+      const { error } = await sb.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: window.location.origin },
+      });
+      if (error) return { ok: false, error: error.message || String(error) };
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, error: err && err.message ? err.message : String(err) };
+    }
+  },
+  async signOut() {
+    let result = { ok: true };
+    try {
+      const { error } = await sb.auth.signOut();
+      if (error) result = { ok: false, error: error.message || String(error) };
+    } catch (err) {
+      result = { ok: false, error: (err && err.message) ? err.message : String(err) };
+    } finally {
+      // Reload to guarantee no in-memory user data leaks across sessions, even
+      // if signOut itself failed (Supabase still clears the token).
+      window.location.reload();
+    }
+    return result;
+  },
+
   async createGoal({ title, why, priority = "normal", commitment = 1, dailyAction = "", recovery = "", checkInTime = null, promiseToText = "Self" }) {
     return sb.from("goals").insert({
       user_id: HANU_USER_ID,
