@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Thin wrapper so Hermes' LLM can call Hanu bridge tools with a short command.
+# Loads Hermes' env (so SUPABASE_URL / SUPABASE_SECRET_KEY / HANU_USER_ID
+# are populated) then dispatches to tools.py.
+#
+# Usage:
+#   hanu_call <tool_name> '<json_args>'
+# Example:
+#   hanu_call save_memory '{"text":"Vamshi prefers no chatty replies","kind":"preference","privacy":"private"}'
+#   hanu_call list_reminders '{}'
+
+set -e
+
+# Resolve real script path even when invoked via symlink (e.g. /usr/local/bin/hanu_call)
+SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
+SKILL_DIR="$(dirname "$SCRIPT_PATH")"
+
+# Load Hermes env without echoing secrets
+if [ -f /root/.hermes/.env ]; then
+  set -a
+  # shellcheck source=/dev/null
+  . /root/.hermes/.env
+  set +a
+fi
+
+exec /usr/local/lib/hermes-agent/venv/bin/python "$SKILL_DIR/tools.py" "$@"

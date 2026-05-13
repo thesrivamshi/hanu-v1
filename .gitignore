@@ -1,0 +1,53 @@
+# ============================================================
+# SECRETS — never commit these
+# ============================================================
+.env
+.env.local
+.env.*.local
+FILL_IN_HERE.txt
+*.pem
+*.key
+id_rsa
+id_ed25519
+**/.ssh/
+
+# ============================================================
+# Vendored upstream code
+# ============================================================
+# Nous Research's Hermes agent lives here as a read-only dependency.
+# It has its own git history and would balloon this repo to many GB
+# if committed. The deploy clones it from upstream on the VPS.
+hermes-agent/
+
+# ============================================================
+# Build / cache / OS / editor
+# ============================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+node_modules/
+.cache/
+dist/
+build/
+*.log
+*.tsbuildinfo
+
+# Mac
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# pptxgenjs scratch output
+package-lock.json
+package.json

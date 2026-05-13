@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hanu Product Requirements – Interactive Document</title>
+  <style>
+    :root{
+      --bg:#f7f5ef; --paper:#fffaf0; --panel:#ffffff; --ink:#1f2937; --muted:#6b7280;
+      --line:#e7dfd0; --brand:#5b3418; --brand2:#8b5e34; --accent:#d97706;
+      --soft:#fff7ed; --soft2:#fef3c7; --good:#166534; --warn:#92400e; --danger:#991b1b;
+      --shadow:0 18px 45px rgba(70,42,17,.12); --radius:18px;
+    }
+    *{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:linear-gradient(120deg,#f7f5ef,#fffaf0);color:var(--ink);line-height:1.58}
+    .shell{display:grid;grid-template-columns:310px 1fr;min-height:100vh}.side{position:sticky;top:0;height:100vh;padding:22px;background:rgba(255,250,240,.88);border-right:1px solid var(--line);backdrop-filter:blur(14px);overflow:auto}.brand{font-size:28px;font-weight:900;color:var(--brand);letter-spacing:-.03em}.subtitle{font-size:13px;color:var(--muted);margin:6px 0 18px}.search{width:100%;border:1px solid var(--line);border-radius:999px;padding:11px 14px;background:white;color:var(--ink);outline:none}.search:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(217,119,6,.12)}.nav{margin-top:18px;display:flex;flex-direction:column;gap:6px}.nav a{text-decoration:none;color:#374151;padding:9px 11px;border-radius:12px;font-size:14px}.nav a:hover{background:#fff1dc;color:var(--brand)}.main{padding:36px 44px 80px;max-width:1160px}.hero{background:linear-gradient(135deg,#3b2415,#9a5b22);color:white;border-radius:28px;padding:36px;box-shadow:var(--shadow);margin-bottom:24px}.hero h1{font-size:42px;line-height:1.05;margin:0 0 12px;letter-spacing:-.04em}.hero p{max-width:850px;font-size:17px;color:#fff3e0}.notice{background:#fffbeb;border:1px solid #fde68a;border-left:6px solid var(--accent);padding:16px 18px;border-radius:16px;margin:18px 0;color:#4a3218}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:0 8px 22px rgba(70,42,17,.06)}.card h3{margin:0 0 8px;color:var(--brand)}.card p{margin:0;color:var(--muted);font-size:14px}.section{background:rgba(255,255,255,.82);border:1px solid var(--line);border-radius:26px;padding:28px;margin:22px 0;box-shadow:0 10px 30px rgba(70,42,17,.06)}.section h2{font-size:30px;margin:0 0 10px;color:var(--brand);letter-spacing:-.025em}.section .lead{font-size:16px;color:#4b5563;max-width:900px}.tag{display:inline-flex;padding:4px 9px;border-radius:999px;background:#fff1dc;color:#7c3f0f;font-weight:700;font-size:12px;margin:2px}.pillrow{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}.three{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.req{border:1px solid var(--line);border-radius:16px;background:#fff;padding:14px;margin:10px 0}.req b{color:var(--brand)}.flow{display:grid;gap:10px;margin:14px 0}.step{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px}.num{min-width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#6b3f1d;color:white;font-weight:800;font-size:13px}.matrix{overflow:auto;border:1px solid var(--line);border-radius:18px;background:white}.matrix table{width:100%;border-collapse:collapse;min-width:720px}.matrix th,.matrix td{text-align:left;padding:12px;border-bottom:1px solid var(--line);vertical-align:top}.matrix th{background:#fff7ed;color:#5b3418}.matrix tr:last-child td{border-bottom:0}.accordion{border:1px solid var(--line);border-radius:16px;background:#fff;margin:10px 0;overflow:hidden}.acc-head{width:100%;text-align:left;background:#fff;padding:15px 16px;border:0;border-bottom:1px solid transparent;font-weight:800;color:#3b2415;cursor:pointer;font-size:15px;display:flex;justify-content:space-between;gap:12px}.acc-head:hover{background:#fff7ed}.acc-body{display:none;padding:0 16px 16px}.accordion.open .acc-body{display:block}.accordion.open .acc-head{border-bottom-color:var(--line);background:#fff7ed}.quote{font-size:18px;font-weight:800;color:#3b2415;background:#fff7ed;border-left:5px solid var(--accent);padding:16px 18px;border-radius:14px}.kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:7px;padding:2px 6px;font-size:12px}.topbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.btn{border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.14);color:white;border-radius:999px;padding:9px 13px;text-decoration:none;font-weight:700;font-size:13px}.btn.dark{background:#fff;color:#5b3418}.hidden{display:none!important}.muted{color:var(--muted)}.small{font-size:13px}.divider{height:1px;background:var(--line);margin:18px 0}.print{position:fixed;right:18px;bottom:18px;background:#3b2415;color:white;border:0;border-radius:999px;padding:13px 17px;font-weight:800;box-shadow:var(--shadow);cursor:pointer}ul{padding-left:20px}li{margin:5px 0}@media(max-width:900px){.shell{display:block}.side{position:relative;height:auto}.main{padding:24px 16px}.grid,.two,.three{grid-template-columns:1fr}.hero h1{font-size:32px}}@media print{.side,.print{display:none}.shell{display:block}.main{max-width:none;padding:0}.section,.hero{box-shadow:none;break-inside:avoid}.acc-body{display:block}.hero{color:#111;background:#fff;border:1px solid #ddd}}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div class="brand">Hanu</div>
+    <div class="subtitle">Interactive Product Requirements Document<br/>Feature-first. No dashboard design prescription.</div>
+    <input id="search" class="search" placeholder="Search features, flows, permissions..." />
+    <nav class="nav">
+      <a href="#overview">Overview</a>
+      <a href="#goal-hanu">Goal-Oriented Hanu</a>
+      <a href="#assistant">Assistant</a>
+      <a href="#memory">Memory</a>
+      <a href="#goals">Goals</a>
+      <a href="#reminders">Reminders</a>
+      <a href="#family-model">Family & Shared Spaces</a>
+      <a href="#permissions">Permissions</a>
+      <a href="#requests">Requests & Approvals</a>
+      <a href="#promises">Promises & Decisions</a>
+      <a href="#inboxes">Inboxes</a>
+      <a href="#modes">Modes</a>
+      <a href="#dashboard-requirements">Control Center Requirements</a>
+      <a href="#future">Future Directions</a>
+      <a href="#full-list">Full Feature Inventory</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <section class="hero searchable" id="overview">
+      <h1>Hanu Product Requirements</h1>
+      <p>Hanu is a self-evolving personal memory, reminder, accountability, relationship, and execution assistant. This document defines what Hanu should do from a product and user-requirement point of view.</p>
+      <div class="topbar">
+        <a class="btn dark" href="#family-model">Open Family Model</a>
+        <a class="btn" href="#permissions">Permission Rules</a>
+        <a class="btn" href="#full-list">Feature Inventory</a>
+      </div>
+    </section>
+
+    <div class="notice searchable">
+      <b>Important:</b> This HTML is not a UI design direction and does not prescribe dashboard visuals, layout style, branding, analytics design, or component design. It only documents product features, behavior, user flows, and requirement logic.
+    </div>
+
+    <section class="section searchable" id="goal-hanu">
+      <h2>Part 1 — Goal-Oriented Hanu</h2>
+      <p class="lead">The first product focus is the individual user's goals, reminders, memory, daily execution, follow-up, promises, and relationships. Hanu should convert intention into action and prevent important things from disappearing.</p>
+      <div class="quote">Tell Hanu what matters. Hanu remembers it, organizes it, reminds you, follows up, and helps you close the loop.</div>
+      <div class="grid">
+        <div class="card"><h3>Memory</h3><p>Remembers preferences, goals, people, routines, decisions, promises, and context.</p></div>
+        <div class="card"><h3>Action</h3><p>Turns conversations into goals, reminders, open loops, follow-ups, and reviews.</p></div>
+        <div class="card"><h3>Accountability</h3><p>Asks for confirmation, tracks misses, detects slips, and guides recovery.</p></div>
+      </div>
+    </section>
+
+    <section class="section searchable" id="assistant">
+      <h2>Conversational Assistant</h2>
+      <p class="lead">The user should be able to speak naturally. Hanu should understand commands, thoughts, commitments, family responsibilities, and raw dumps.</p>
+      <div class="accordion open"><button class="acc-head">Core assistant behavior <span>+</span></button><div class="acc-body"><ul>
+        <li>Natural chat for reminders, goals, plans, decisions, reflections, and updates.</li>
+        <li>Voice-note understanding for quick capture while walking, driving, or thinking.</li>
+        <li>Context-aware response based on current goals, time, commitments, relationships, and recent behavior.</li>
+        <li>Quick capture for messy thought dumps.</li>
+        <li>Clarifies whether something is a note, task, reminder, goal, promise, memory, or open loop.</li>
+      </ul></div></div>
+      <div class="req"><b>Example:</b> “Dump: check Razorpay, call Aman, think about pricing.” Hanu should extract possible open loops and ask what should become tasks, reminders, or decisions.</div>
+    </section>
+
+    <section class="section searchable" id="memory">
+      <h2>Personal Memory</h2>
+      <p class="lead">Hanu’s memory must be useful, explainable, correctable, and controlled by the user.</p>
+      <div class="pillrow">
+        <span class="tag">Preference</span><span class="tag">Goal</span><span class="tag">Routine</span><span class="tag">Person</span><span class="tag">Project</span><span class="tag">Decision</span><span class="tag">Promise</span><span class="tag">Boundary</span><span class="tag">Important Date</span>
+      </div>
+      <div class="two">
+        <div class="card"><h3>Memory actions</h3><ul><li>Save on explicit request.</li><li>Suggest saving important information.</li><li>Update conflicting memories with confirmation.</li><li>Forget or delete on request.</li><li>Show why Hanu knows something.</li></ul></div>
+        <div class="card"><h3>Memory safety</h3><ul><li>Do not save secrets like passwords or PINs.</li><li>Ask before saving sensitive details.</li><li>Allow user to edit, archive, pin, or remove memory.</li><li>Review stale or duplicate memories over time.</li></ul></div>
+      </div>
+      <h3>Memory privacy levels</h3>
+      <div class="matrix"><table><thead><tr><th>Level</th><th>Meaning</th><th>Example</th><th>Required behavior</th></tr></thead><tbody>
+        <tr><td>Private</td><td>Only the user can access it.</td><td>Journal thoughts, personal struggle.</td><td>Never share with family or contacts.</td></tr>
+        <tr><td>Shareable with approval</td><td>Can be shared only after asking.</td><td>Current work focus.</td><td>Ask the user before answering.</td></tr>
+        <tr><td>Shared with person</td><td>Visible to a selected person.</td><td>Reminder connected to mother.</td><td>Share only with that person.</td></tr>
+        <tr><td>Shared inside space</td><td>Visible to a group space.</td><td>Family appointment.</td><td>Share with approved space members.</td></tr>
+        <tr><td>Never share / sensitive</td><td>Protected category.</td><td>Finance, location, private health notes, family conflict.</td><td>Refuse or ask for explicit confirmation depending on category.</td></tr>
+      </tbody></table></div>
+    </section>
+
+    <section class="section searchable" id="goals">
+      <h2>Goals, Execution & Accountability</h2>
+      <p class="lead">Hanu should help users create, break down, act on, review, and recover goals.</p>
+      <div class="three">
+        <div class="card"><h3>Goal creation</h3><p>Capture why it matters, deadline, daily action, minimum action, check-ins, and failure plan.</p></div>
+        <div class="card"><h3>Commitment strength</h3><p>Idea, maybe, planned, committed, non-negotiable, promise to someone, family-critical.</p></div>
+        <div class="card"><h3>Recovery</h3><p>After misses, ask why, reduce the action, reschedule honestly, or restart with a minimum action.</p></div>
+      </div>
+      <h3>Failure reason tracking</h3>
+      <div class="pillrow"><span class="tag">Forgot</span><span class="tag">Too tired</span><span class="tag">Avoided</span><span class="tag">Overplanned</span><span class="tag">No time</span><span class="tag">Blocked by someone</span><span class="tag">Wrong time</span><span class="tag">Too big</span><span class="tag">Not important anymore</span></div>
+      <div class="req"><b>Requirement:</b> Hanu should not only mark failure. It should learn the reason and improve the future plan, reminder time, or task size.</div>
+    </section>
+
+    <section class="section searchable" id="reminders">
+      <h2>Reminders, Scheduling & Follow-Up</h2>
+      <p class="lead">Hanu reminders should not be fire-and-forget. Important reminders should ask for confirmation and follow up until closure or reschedule.</p>
+      <div class="accordion open"><button class="acc-head">Reminder types <span>+</span></button><div class="acc-body"><ul>
+        <li>One-time reminders.</li><li>Recurring reminders.</li><li>Smart reminders suggested from conversation.</li><li>Confirmation-based reminders.</li><li>Family reminders.</li><li>Goal-linked reminders.</li><li>Waiting-on-someone follow-ups.</li><li>Review reminders.</li>
+      </ul></div></div>
+      <div class="flow">
+        <div class="step"><div class="num">1</div><div><b>Reminder sent.</b><br><span class="muted">Hanu asks the user to act or confirm.</span></div></div>
+        <div class="step"><div class="num">2</div><div><b>No response.</b><br><span class="muted">Hanu follows up based on priority and user’s chosen strictness.</span></div></div>
+        <div class="step"><div class="num">3</div><div><b>Still no response.</b><br><span class="muted">Hanu asks for reason, marks as missed, or escalates if permission exists.</span></div></div>
+        <div class="step"><div class="num">4</div><div><b>Recovery.</b><br><span class="muted">Hanu suggests the smallest action, honest reschedule, or plan change.</span></div></div>
+      </div>
+    </section>
+
+    <section class="section searchable" id="family-model">
+      <h2>Family, Shared Spaces & Identity Model</h2>
+      <p class="lead">This is a core Hanu concept: a family member is not merely stored inside one user’s account. Every person can have their own private Hanu, and shared spaces connect people with explicit permissions.</p>
+      <div class="quote">Person Profile → belongs to Spaces → has Relationships → permissions control access.</div>
+      <div class="two">
+        <div class="card"><h3>Individual profile</h3><p>Each person can have their own private Hanu with private memories, reminders, goals, preferences, and conversations.</p></div>
+        <div class="card"><h3>Shared space</h3><p>A shared area like Family Space, Trusted Circle, Project Space, Care Space, or Education Space. It contains shared responsibilities and allowed context.</p></div>
+      </div>
+      <h3>Identity types</h3>
+      <div class="matrix"><table><thead><tr><th>Type</th><th>Meaning</th><th>Example</th></tr></thead><tbody>
+        <tr><td>Private Hanu User</td><td>A person with their own Hanu account and private assistant.</td><td>Vamshi, Mother, Friend.</td></tr>
+        <tr><td>External Contact</td><td>A person who can receive or send limited messages but does not use the full app.</td><td>Friend receives a reminder request.</td></tr>
+        <tr><td>Family Member</td><td>A person connected through a family relationship and optionally part of a family space.</td><td>Mother, father, sibling.</td></tr>
+        <tr><td>Trusted Circle Member</td><td>Non-family trusted person with selected access.</td><td>Close friend or mentor.</td></tr>
+        <tr><td>Project Space Member</td><td>Person connected to a project context.</td><td>Aman in Alpha Wellness project.</td></tr>
+        <tr><td>Managed / Dependent Profile</td><td>A profile for someone who may not actively use Hanu but needs reminders or care coordination.</td><td>Father uses WhatsApp only; family manages reminders.</td></tr>
+      </tbody></table></div>
+      <h3>Spaces</h3>
+      <div class="grid">
+        <div class="card"><h3>My Private Space</h3><p>Private thoughts, goals, notes, memories, decisions, and personal routines.</p></div>
+        <div class="card"><h3>Family Space</h3><p>Shared family reminders, appointments, responsibilities, events, and routines.</p></div>
+        <div class="card"><h3>Trusted Circle</h3><p>Selected friends or mentors who can send requests or ask limited status.</p></div>
+        <div class="card"><h3>Project Space</h3><p>Project-specific tasks, follow-ups, decisions, and shared updates.</p></div>
+        <div class="card"><h3>Care Space</h3><p>Medication reminders, appointments, elder-care routines, and escalation flows.</p></div>
+        <div class="card"><h3>Education Space Later</h3><p>Student, parent, teacher, classroom, and learning-context interactions.</p></div>
+      </div>
+    </section>
+
+    <section class="section searchable" id="permissions">
+      <h2>Relationship Permissions & Access Rules</h2>
+      <p class="lead">People should be able to interact with Hanu around the user, but only within explicit boundaries. Hanu should protect private memory by default.</p>
+      <h3>Simple permission levels</h3>
+      <div class="matrix"><table><thead><tr><th>Level</th><th>Name</th><th>Can do</th><th>Cannot do</th></tr></thead><tbody>
+        <tr><td>0</td><td>Contact only</td><td>Receive selected messages or reminders.</td><td>Cannot ask about the user.</td></tr>
+        <tr><td>1</td><td>Can send requests</td><td>Ask Hanu to pass a message or task to the user.</td><td>Cannot see personal info.</td></tr>
+        <tr><td>2</td><td>Can share tasks/reminders</td><td>Create or participate in shared reminders/tasks.</td><td>Cannot read private memories.</td></tr>
+        <tr><td>3</td><td>Can ask limited status</td><td>Ask allowed status like availability or shared task state.</td><td>Cannot access sensitive/private details.</td></tr>
+        <tr><td>4</td><td>Shared-space co-manager</td><td>Manage shared family responsibilities inside a space.</td><td>Still cannot access private Hanu memories.</td></tr>
+      </tbody></table></div>
+      <h3>Question handling rules</h3>
+      <div class="grid">
+        <div class="card"><h3>Safe shared info</h3><p>Answer if the requester has permission and the information is shared.</p></div>
+        <div class="card"><h3>Needs approval</h3><p>Ask the user before sharing personal or ambiguous information.</p></div>
+        <div class="card"><h3>Private info</h3><p>Refuse to share private memories, journals, sensitive categories, or restricted details.</p></div>
+        <div class="card"><h3>Action request</h3><p>Forward the request to the user instead of revealing information.</p></div>
+        <div class="card"><h3>Limited answer</h3><p>Share a safe summary without exposing private context.</p></div>
+        <div class="card"><h3>Unknown</h3><p>Say Hanu does not know or ask the user for confirmation.</p></div>
+      </div>
+      <div class="req"><b>Example:</b> Mother asks “Is Vamshi busy?” Allowed answer could be: “He appears unavailable right now. I can ask him to call you.” It should not reveal private work, mood, journal, or failure details.</div>
+    </section>
+
+    <section class="section searchable" id="requests">
+      <h2>Requests, Approvals, Relay & Shared Responsibility</h2>
+      <p class="lead">Hanu should act as a trusted relay between people, not as a privacy leak. Requests should flow through approvals where needed.</p>
+      <div class="two">
+        <div class="card"><h3>Approval queue</h3><ul><li>Information requests.</li><li>Reminder requests.</li><li>Family task requests.</li><li>Access requests.</li><li>Shared memory requests.</li></ul></div>
+        <div class="card"><h3>Message relay</h3><ul><li>“Tell Vamshi to call me.”</li><li>“Tell Vamshi I uploaded the videos.”</li><li>“Ask Vamshi if he is free tomorrow.”</li><li>“Ask him to approve this shared reminder.”</li></ul></div>
+      </div>
+      <h3>Shared responsibility ownership</h3>
+      <div class="matrix"><table><thead><tr><th>Requirement</th><th>Meaning</th></tr></thead><tbody>
+        <tr><td>Owner</td><td>Who is responsible for completing the task.</td></tr>
+        <tr><td>Requester</td><td>Who asked for the task.</td></tr>
+        <tr><td>Affected person</td><td>Who the task is about or for.</td></tr>
+        <tr><td>Visibility</td><td>Who can see it inside the shared space.</td></tr>
+        <tr><td>Completion authority</td><td>Who can mark it done.</td></tr>
+        <tr><td>Notification rule</td><td>Who gets updated and when.</td></tr>
+      </tbody></table></div>
+      <h3>Conflict handling</h3>
+      <div class="req"><b>Requirement:</b> If two people provide conflicting updates, Hanu should not blindly overwrite. It should flag the conflict and ask the right person to confirm.</div>
+      <div class="req"><b>Example:</b> Mother marks father’s tablet as done. Father says he forgot. Hanu should show a conflicting update and request confirmation.</div>
+    </section>
+
+    <section class="section searchable" id="promises">
+      <h2>Promises, Decisions & Relationship Maintenance</h2>
+      <p class="lead">Hanu should remember not only tasks, but commitments and decisions that explain the user’s life direction.</p>
+      <div class="three">
+        <div class="card"><h3>Promise tracking</h3><p>Track what was promised, to whom, by when, current status, and whether it was kept or broken.</p></div>
+        <div class="card"><h3>Decision log</h3><p>Remember decisions, why they were made, when they were made, and when to revisit.</p></div>
+        <div class="card"><h3>Relationship maintenance</h3><p>Notice neglected people, pending replies, follow-ups, birthdays, and family responsibilities.</p></div>
+      </div>
+      <div class="req"><b>Examples:</b> “I promised Aman I’ll send the file.” “We decided not to call Hanu an MVP.” “I decided course is near-term cashflow.”</div>
+    </section>
+
+    <section class="section searchable" id="inboxes">
+      <h2>Memory Inbox, Open-Loop Inbox & Organization Flow</h2>
+      <p class="lead">Not everything should become a permanent memory or a scheduled reminder immediately. Hanu needs holding areas where the user can approve, edit, or ignore captured items.</p>
+      <div class="grid">
+        <div class="card"><h3>Memory Inbox</h3><p>Possible memories Hanu found from conversation: preferences, routines, people details, project context, family responsibility.</p></div>
+        <div class="card"><h3>Open-Loop Inbox</h3><p>Unfinished items detected from messy thought dumps or conversations.</p></div>
+        <div class="card"><h3>Inbox-to-organization</h3><p>User approves categories; Hanu creates goals, reminders, memories, open loops, decisions, or promises.</p></div>
+      </div>
+      <div class="flow">
+        <div class="step"><div class="num">1</div><div><b>User dumps thoughts.</b><br><span class="muted">No structure required.</span></div></div>
+        <div class="step"><div class="num">2</div><div><b>Hanu extracts items.</b><br><span class="muted">Possible tasks, memories, decisions, promises, reminders.</span></div></div>
+        <div class="step"><div class="num">3</div><div><b>User approves.</b><br><span class="muted">Save, edit, ignore, schedule, or convert.</span></div></div>
+        <div class="step"><div class="num">4</div><div><b>Hanu follows through.</b><br><span class="muted">The right item appears in the right product area.</span></div></div>
+      </div>
+    </section>
+
+    <section class="section searchable" id="modes">
+      <h2>Modes, Boundaries & Notification Behavior</h2>
+      <p class="lead">Hanu should adjust behavior based on user state, relationship, time, and importance.</p>
+      <div class="pillrow"><span class="tag">Normal</span><span class="tag">Strict</span><span class="tag">Gentle</span><span class="tag">Family</span><span class="tag">Deep Work</span><span class="tag">Recovery</span><span class="tag">Now Mode</span><span class="tag">Low Energy</span><span class="tag">Quiet Hours</span><span class="tag">Vacation / Pause</span></div>
+      <div class="accordion"><button class="acc-head">Now Mode <span>+</span></button><div class="acc-body"><p>When the user asks “What should I do now?”, Hanu should give one clear next action based on current time, energy, top goal, urgency, overdue items, and known avoidance patterns.</p><div class="req"><b>Example:</b> “Open the Hanu repo. Work for 25 minutes. Ignore everything else.”</div></div></div>
+      <div class="accordion"><button class="acc-head">Quiet hours and social boundaries <span>+</span></button><div class="acc-body"><ul><li>Do not message certain people after selected hours.</li><li>Only urgent reminders during quiet hours.</li><li>Use different tone by person: strict for user, gentle for parent, professional for friend.</li></ul></div></div>
+      <div class="accordion"><button class="acc-head">Emergency-like boundaries <span>+</span></button><div class="acc-body"><p>Hanu can support important reminders and escalation, but should not represent itself as emergency medical, legal, or safety support. For true emergencies, the product should direct people to local emergency services or appropriate professionals.</p></div></div>
+    </section>
+
+    <section class="section searchable" id="dashboard-requirements">
+      <h2>Control Center Requirements, Not Dashboard Design</h2>
+      <p class="lead">This section defines what information and controls the product must provide. It does not define the visual dashboard design, layout, style, analytics page, charting, or UI direction.</p>
+      <div class="notice"><b>Do not treat this as visual design instruction.</b> These are product capabilities that must exist somewhere in the experience.</div>
+      <div class="grid">
+        <div class="card"><h3>Today Command</h3><p>Show what matters now: non-negotiable, time-sensitive, family-critical, pending confirmation, open loops.</p></div>
+        <div class="card"><h3>People & Access</h3><p>Show people, relationship, spaces, and what they can ask, see, send, or manage.</p></div>
+        <div class="card"><h3>Approvals</h3><p>Review incoming information requests, access requests, shared tasks, and relay messages.</p></div>
+        <div class="card"><h3>Memory Control</h3><p>Search, edit, delete, correct, pin, archive, and review what Hanu knows.</p></div>
+        <div class="card"><h3>Activity History</h3><p>Show what Hanu did, why it did it, who requested it, who saw it, and what was shared.</p></div>
+        <div class="card"><h3>Life Areas</h3><p>Organize by self, family, work, money, fitness, health routines, learning, spiritual, content, projects, relationships, home.</p></div>
+      </div>
+    </section>
+
+    <section class="section searchable" id="future">
+      <h2>Future Direction After Goal-Oriented Hanu</h2>
+      <p class="lead">After the core goal-oriented Hanu is strong, the same product principles can expand into family operations, education, work, health routines, finance, and wider personal intelligence.</p>
+      <div class="accordion open"><button class="acc-head">Family Hanu <span>+</span></button><div class="acc-body"><ul><li>Shared family tasks.</li><li>Parent reminders.</li><li>Appointments.</li><li>Household responsibilities.</li><li>Permission-based status sharing.</li><li>Managed/dependent profiles.</li></ul></div></div>
+      <div class="accordion"><button class="acc-head">Education Hanu later <span>+</span></button><div class="acc-body"><ul><li>Student learning profile.</li><li>Parent/teacher visibility boundaries.</li><li>Lesson memory.</li><li>Personalized explanations.</li><li>Homework reminders.</li><li>Learning gaps and revision planning.</li><li>Child/minor safety requirements.</li></ul></div></div>
+      <div class="accordion"><button class="acc-head">Work, health routine, and finance Hanu later <span>+</span></button><div class="acc-body"><ul><li>Project memory and action items.</li><li>Meeting follow-ups.</li><li>Medication and supplement reminders.</li><li>Doctor appointment reminders.</li><li>Bill, EMI, and savings goal reminders.</li><li>Clear boundaries: no medical diagnosis or regulated financial advice unless properly handled later.</li></ul></div></div>
+    </section>
+
+    <section class="section searchable" id="full-list">
+      <h2>Full Feature Inventory</h2>
+      <p class="lead">A consolidated product inventory for Hanu. This is intentionally broad so future agents and builders understand the full product meaning.</p>
+      <div class="accordion open"><button class="acc-head">Core individual Hanu <span>+</span></button><div class="acc-body"><ul>
+        <li>Natural chat, voice note understanding, quick capture, command recognition.</li>
+        <li>Personal memory vault, memory source view, memory correction, memory deletion.</li>
+        <li>Goal creation, breakdown, milestones, daily action mapping, streaks, risk detection.</li>
+        <li>One-time, recurring, smart, confirmation, and follow-up reminders.</li>
+        <li>Open loops, promises, decisions, waiting-on-others, relationship follow-ups.</li>
+        <li>Morning planning, midday check-in, evening review, weekly and monthly reviews.</li>
+        <li>Now Mode, Recovery Mode, Strict Mode, Gentle Mode, Deep Work Mode.</li>
+      </ul></div></div>
+      <div class="accordion"><button class="acc-head">Family, people, and shared spaces <span>+</span></button><div class="acc-body"><ul>
+        <li>Individual profiles, external contacts, family members, trusted circle, project members, managed/dependent profiles.</li>
+        <li>Private Space, Family Space, Trusted Circle, Project Space, Care Space, Education Space later.</li>
+        <li>Relationship permissions and access levels.</li>
+        <li>People & Access controls.</li>
+        <li>Approval queue for requests and access.</li>
+        <li>Information request rules.</li>
+        <li>Message relay between people.</li>
+        <li>Shared responsibility ownership.</li>
+        <li>Conflict handling.</li>
+        <li>Quiet hours and per-person notification intensity.</li>
+      </ul></div></div>
+      <div class="accordion"><button class="acc-head">Safety, trust, and control <span>+</span></button><div class="acc-body"><ul>
+        <li>Memory privacy levels: private, shareable with approval, shared with person, shared inside space, never share/sensitive.</li>
+        <li>Consent flows for adding people, sharing information, and messaging others.</li>
+        <li>Ask-before-acting settings: act automatically, ask first, never act.</li>
+        <li>Sensitive categories: health, finance, location, private journal, relationship issues, family conflicts, children, legal matters, work confidential info, passwords/secrets.</li>
+        <li>Activity history: what Hanu did, why, who requested it, who saw it, and what was shared.</li>
+      </ul></div></div>
+      <div class="accordion"><button class="acc-head">Templates <span>+</span></button><div class="acc-body"><ul>
+        <li>30-day goal.</li><li>Medication reminder.</li><li>Call parents weekly.</li><li>Daily deep work.</li><li>Project follow-up.</li><li>Bill payment.</li><li>Workout routine.</li><li>Content creation routine.</li><li>Weekly review.</li><li>Exam preparation later.</li>
+      </ul></div></div>
+      <div class="accordion"><button class="acc-head">What Hanu is not <span>+</span></button><div class="acc-body"><ul>
+        <li>Not a basic reminder app.</li><li>Not a calendar clone.</li><li>Not a generic chatbot.</li><li>Not only a habit tracker.</li><li>Not a therapy replacement.</li><li>Not a medical diagnosis app.</li><li>Not a financial advisor.</li><li>Not a school app only.</li>
+      </ul></div></div>
+    </section>
+  </main>
+</div>
+<button class="print" onclick="window.print()">Print / Save</button>
+<script>
+  document.querySelectorAll('.acc-head').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const acc=btn.closest('.accordion');
+      acc.classList.toggle('open');
+      btn.querySelector('span').textContent=acc.classList.contains('open')?'−':'+';
+    });
+    const acc=btn.closest('.accordion');
+    btn.querySelector('span').textContent=acc.classList.contains('open')?'−':'+';
+  });
+  const search=document.getElementById('search');
+  search.addEventListener('input',()=>{
+    const q=search.value.trim().toLowerCase();
+    document.querySelectorAll('.searchable,.section').forEach(el=>{
+      if(!q){el.classList.remove('hidden');return;}
+      el.classList.toggle('hidden', !el.innerText.toLowerCase().includes(q));
+    });
+  });
+</script>
+</body>
+</html>
