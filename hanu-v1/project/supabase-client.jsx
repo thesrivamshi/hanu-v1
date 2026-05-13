@@ -61,7 +61,7 @@ function shapeGoal(row, completions = []) {
     title: row.title,
     why: row.why || "",
     priority: _dbToUi(row.priority),
-    commitment: ["idea","planned","committed","promised","non_negotiable"].indexOf(row.commitment),
+    commitment: ["idea","maybe","planned","committed","promised","non_negotiable"].indexOf(row.commitment),
     promiseTo: row.promise_to_text || "Self",
     dailyAction: row.daily_action || "",
     streak: row.streak ?? 0,
@@ -69,6 +69,7 @@ function shapeGoal(row, completions = []) {
     risk: row.risk || "low",
     nextCheckIn: row.next_check_in_at || "",
     recovery: row.recovery_rule || "",
+    family_critical: !!row.family_critical,
     sparkline: spark,
   };
 }
@@ -217,7 +218,7 @@ async function hanuLoad() {
   const [
     profileRes, settingsRes, peopleRes, goalsRes, completionsRes,
     remindersRes, loopsRes, memoriesRes, inboxRes, approvalsRes,
-    promisesRes, decisionsRes,
+    promisesRes, decisionsRes, conflictsRes,
   ] = await Promise.all([
     sb.from("profiles").select("*").eq("id", HANU_USER_ID).single(),
     sb.from("settings").select("*").eq("user_id", HANU_USER_ID).maybeSingle(),
@@ -231,6 +232,7 @@ async function hanuLoad() {
     sb.from("approvals").select("*").eq("user_id", HANU_USER_ID).eq("state", "pending"),
     sb.from("promises").select("*").eq("user_id", HANU_USER_ID),
     sb.from("decisions").select("*").eq("user_id", HANU_USER_ID).order("decided_on", { ascending: false }),
+    sb.from("conflicts").select("*").eq("user_id", HANU_USER_ID).eq("state", "open").order("created_at", { ascending: false }),
   ]);
 
   const completionsByGoal = {};
@@ -257,6 +259,7 @@ async function hanuLoad() {
   window.HANU.approvals = (approvalsRes.data || []).map(a => shapeApproval(a, peopleById));
   window.HANU.promises = (promisesRes.data || []).map(p => shapePromise(p, peopleById));
   window.HANU.decisions = (decisionsRes.data || []).map(shapeDecision);
+  window.HANU.conflicts = (conflictsRes.data || []);
 
   // Update nav counts
   for (const item of window.HANU.nav) {
@@ -287,7 +290,7 @@ window.hanuLoad = hanuLoad;
 const _watchedTables = [
   "profiles", "settings", "people", "goals", "goal_completions",
   "reminders", "open_loops", "memories", "memory_inbox", "approvals",
-  "promises", "decisions",
+  "promises", "decisions", "conflicts",
 ];
 
 function hanuSubscribe(onChange) {
@@ -350,7 +353,7 @@ window.hanu = {
     return sb.from("goals").insert({
       user_id: HANU_USER_ID,
       title, why, priority: _uiToDb(priority),
-      commitment: ["idea","planned","committed","promised","non_negotiable"][Math.min(4, Math.max(0, commitment))],
+      commitment: ["idea","maybe","planned","committed","promised","non_negotiable"][Math.min(4, Math.max(0, commitment))],
       daily_action: dailyAction, recovery_rule: recovery,
       check_in_time: checkInTime, promise_to_text: promiseToText,
       status: "active",

@@ -540,13 +540,14 @@ function GoalDetailDrawer({ id, onClose }) {
 function MemoryDetailModal({ id, onClose }) {
   const m = HANU.memories.find(x => x.id === id) || HANU.memories[0];
   const [privacy, setPrivacy] = React.useState(m.privacy);
+  // Values match DB enum memory_privacy (5 values after task 07 remap).
+  // UI helpers _dbToUi / _uiToDb hyphenate at the boundary.
   const opts = [
-    { value: "private", label: "Private" },
-    { value: "ask-share", label: "Ask before sharing" },
-    { value: "shared", label: "Shared with person" },
-    { value: "shared-space", label: "Shared in space" },
-    { value: "sensitive", label: "Sensitive" },
-    { value: "never", label: "Never share" },
+    { value: "private",            label: "Private" },
+    { value: "ask-share",          label: "Ask before sharing" },
+    { value: "shared-with-person", label: "Shared with person" },
+    { value: "shared-in-space",    label: "Shared in space" },
+    { value: "never-share",        label: "Never share" },
   ];
 
   return (
@@ -583,10 +584,9 @@ function MemoryDetailModal({ id, onClose }) {
             <div className="muted mt-8" style={{ fontSize: 13, lineHeight: 1.5 }}>
               {privacy === "private" && "Only you. Hanu will not surface this in any shared context — even if asked."}
               {privacy === "ask-share" && "Hanu will ask you every time someone's question would touch this memory."}
-              {privacy === "shared" && "Visible to the person you select. Not anyone else."}
-              {privacy === "shared-space" && "Visible to members of the space you select. Family Space, Project Space, etc."}
-              {privacy === "sensitive" && "Treated as protected. Requires explicit confirmation to save or share."}
-              {privacy === "never" && "Hanu will refuse any share request that touches this. Cannot be relaxed without re-confirming."}
+              {privacy === "shared-with-person" && "Visible to the person you select. Not anyone else."}
+              {privacy === "shared-in-space" && "Visible to members of the space you select. Family Space, Project Space, etc."}
+              {privacy === "never-share" && "Hanu will refuse any share request that touches this. Cannot be relaxed without re-confirming."}
             </div>
           </div>
         </div>
