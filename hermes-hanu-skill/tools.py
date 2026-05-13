@@ -498,7 +498,11 @@ def hanu_add_person(
     tone: Optional[str] = None,
     initials: Optional[str] = None,
     note: Optional[str] = None,
+    permission_tier: int = 0,
 ) -> dict:
+    """permission_tier: 0..4 per PRD. 0 = contact only; 4 = shared-space co-manager."""
+    if not (0 <= permission_tier <= 4):
+        return _err(f"permission_tier must be 0..4; got {permission_tier!r}")
     try:
         if not initials:
             initials = "".join([w[0] for w in name.split()[:2]]).upper()
@@ -512,6 +516,7 @@ def hanu_add_person(
             "tone": tone,
             "initials": initials,
             "note": note,
+            "permission_tier": permission_tier,
         }).execute()
         pid = res.data[0]["id"] if res.data else None
         log_activity("person_added", f"Added person: {name} ({relationship})", "people", pid)
@@ -524,8 +529,11 @@ def hanu_update_person(id: str, **fields) -> dict:
     allowed = {
         "name", "relationship", "profile_type", "primary_channel", "whatsapp_number",
         "phone_number", "email", "tone", "quiet_hours_start", "quiet_hours_end",
-        "can_ask", "can_send", "can_see", "approval_rule", "note", "avatar_tone"
+        "can_ask", "can_send", "can_see", "approval_rule", "note", "avatar_tone",
+        "permission_tier",
     }
+    if "permission_tier" in fields and not (0 <= fields["permission_tier"] <= 4):
+        return _err(f"permission_tier must be 0..4; got {fields['permission_tier']!r}")
     patch = {k: v for k, v in fields.items() if k in allowed}
     if not patch: return _err("nothing to update")
     try:
@@ -561,14 +569,14 @@ def hanu_set_permission(
 
 
 def hanu_check_can(person_id: str, capability: str) -> dict:
-    """Return whether `person_id` is granted `capability`. Default: deny."""
+    """Return whether `person_id` is granted `capability` via tier baseline +
+    explicit override (see public.has_capability)."""
     try:
-        res = sb().table("permissions").select("granted,scope").eq(
-            "person_id", person_id
-        ).eq("capability", capability).limit(1).execute()
-        rows = res.data or []
-        granted = bool(rows and rows[0].get("granted"))
-        return _ok(granted=granted, scope=rows[0].get("scope") if rows else None)
+        res = sb().rpc("has_capability", {
+            "p_person_id": person_id,
+            "p_capability": capability,
+        }).execute()
+        return _ok(granted=bool(res.data))
     except Exception as e:
         return _err(str(e))
 

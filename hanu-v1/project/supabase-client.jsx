@@ -173,6 +173,7 @@ function shapePerson(p) {
                  : p.profile_type === "trusted" ? "Trusted circle"
                  : p.profile_type === "self"    ? "Private profile"
                  : "External contact",
+    tier: typeof p.permission_tier === "number" ? p.permission_tier : 0,
     spaces: [],
     canAsk: p.can_ask || "",
     canSend: p.can_send || "",
