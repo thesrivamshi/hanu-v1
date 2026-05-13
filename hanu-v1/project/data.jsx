@@ -35,6 +35,7 @@ const HANU = {
   approvals: [],
   promises: [],
   decisions: [],
+  conflicts: [],
 
   family: {
     name: "Battini Family",

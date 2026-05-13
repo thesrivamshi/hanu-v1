@@ -734,6 +734,83 @@ def hanu_log_activity_freeform(
 
 
 # =============================================================================
+# CONFLICTS (task 10)
+# =============================================================================
+
+def hanu_record_conflict(
+    target_table: str,
+    target_id: str,
+    party_person_ids: list[str],
+    description: str,
+    proposed_resolver_id: Optional[str] = None,
+) -> dict:
+    """Record a conflict between parties acting on a shared row (e.g., Mother
+    marks Father's tablet done; Father says he forgot). Surfaces in the UI;
+    user resolves via hanu_resolve_conflict."""
+    try:
+        res = sb().table("conflicts").insert({
+            "user_id": USER_ID,
+            "target_table": target_table,
+            "target_id": target_id,
+            "party_person_ids": party_person_ids,
+            "description": description,
+            "proposed_resolver_id": proposed_resolver_id,
+            "state": "open",
+        }).execute()
+        cid = res.data[0]["id"] if res.data else None
+        log_activity("conflict_recorded", description[:80], "conflicts", cid)
+        return _ok(id=cid)
+    except Exception as e:
+        return _err(str(e))
+
+
+def hanu_resolve_conflict(
+    id: str,
+    resolution: str,
+    resolved_by_person_id: Optional[str] = None,
+) -> dict:
+    try:
+        sb().table("conflicts").update({
+            "state": "resolved",
+            "resolution": resolution,
+            "resolved_by_person_id": resolved_by_person_id,
+            "resolved_at": now_iso(),
+        }).eq("id", id).eq("user_id", USER_ID).execute()
+        log_activity("conflict_resolved", f"Resolved conflict {id}", "conflicts", id)
+        return _ok(id=id)
+    except Exception as e:
+        return _err(str(e))
+
+
+def hanu_list_open_conflicts() -> dict:
+    try:
+        res = sb().table("conflicts").select("*").eq("user_id", USER_ID).eq(
+            "state", "open"
+        ).order("created_at", desc=True).limit(20).execute()
+        return _ok(conflicts=res.data or [])
+    except Exception as e:
+        return _err(str(e))
+
+
+def hanu_recent_writers(target_table: str, target_id: str, within_seconds: int = 300) -> dict:
+    """Return person_ids who acted on this target recently. Used by the agent
+    before applying a state change, to detect cross-person conflicts."""
+    from datetime import datetime, timedelta, timezone
+    try:
+        since = (datetime.now(timezone.utc) - timedelta(seconds=within_seconds)).isoformat()
+        res = sb().table("activity_log").select(
+            "actor_person_id,actor,kind,created_at"
+        ).eq("target_table", target_table).eq("target_id", target_id).gte(
+            "created_at", since
+        ).execute()
+        rows = res.data or []
+        person_ids = sorted({r["actor_person_id"] for r in rows if r.get("actor_person_id")})
+        return _ok(recent_person_ids=person_ids, raw=rows)
+    except Exception as e:
+        return _err(str(e))
+
+
+# =============================================================================
 # CLI dispatcher — how Hermes invokes these tools
 # =============================================================================
 # Hermes' skills system gives the LLM a `bash` tool. Skills tell the LLM what
@@ -782,6 +859,11 @@ _TOOL_REGISTRY = {
     # Conversations
     "get_or_create_conversation": hanu_get_or_create_conversation,
     "log_message": hanu_log_message,
+    # Conflicts (task 10)
+    "record_conflict": hanu_record_conflict,
+    "resolve_conflict": hanu_resolve_conflict,
+    "list_open_conflicts": hanu_list_open_conflicts,
+    "recent_writers": hanu_recent_writers,
     # Misc
     "record_daily_review": hanu_record_daily_review,
     "get_settings": hanu_get_settings,
