@@ -609,10 +609,9 @@ def hanu_log_message(
             "raw_payload": raw_payload or {},
             "channel_message_id": channel_message_id,
         }).execute()
-        sb().table("conversations").update({
-            "last_message_at": now_iso(),
-            "message_count": sb().rpc("increment_message_count", {"conv_id": conversation_id}).execute().data if False else 1,
-        }).eq("id", conversation_id).execute()
+        # message_count and last_message_at are maintained by the
+        # messages_after_change trigger in Postgres. Application code does
+        # not write these columns.
         return _ok()
     except Exception as e:
         return _err(str(e))
