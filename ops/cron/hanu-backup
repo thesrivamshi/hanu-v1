@@ -1,0 +1,5 @@
+# /etc/cron.d/hanu-backup
+0 3 * * * root /usr/local/bin/hanu-backup.sh >/var/log/hanu/backup.log 2>&1
+
+# Optional disk-fullness alarm (logs WARN to syslog when / > 80% full).
+*/30 * * * * root df -h / | awk 'NR==2 && +$5>80 { exit 1 }' || logger -p user.warning "hanu droplet disk >80%"

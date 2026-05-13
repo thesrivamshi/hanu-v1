@@ -1,0 +1,17 @@
+[Unit]
+Description=Hanu voice-note transcription worker
+After=network.target
+
+[Service]
+Type=simple
+User=root
+EnvironmentFile=/root/.hermes/.env
+WorkingDirectory=/root/.hermes/skills/hanu-bridge
+ExecStart=/usr/local/lib/hermes-agent/venv/bin/python transcription_worker.py
+Restart=always
+RestartSec=10
+StandardOutput=append:/var/log/hanu/transcription-worker.log
+StandardError=append:/var/log/hanu/transcription-worker.log
+
+[Install]
+WantedBy=multi-user.target

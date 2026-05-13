@@ -1,0 +1,6 @@
+[Unit]
+Description=Touch the Hermes gateway heartbeat file
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'systemctl --user is-active hermes-gateway >/dev/null && touch /var/run/hermes-gateway.heartbeat'

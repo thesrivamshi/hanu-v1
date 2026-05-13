@@ -1,0 +1,20 @@
+[Unit]
+Description=Hanu reminder firing + follow-up + recovery worker
+After=network.target hermes-gateway.service
+Wants=hermes-gateway.service
+
+[Service]
+Type=simple
+User=root
+EnvironmentFile=/root/.hermes/.env
+WorkingDirectory=/root/.hermes/skills/hanu-bridge
+ExecStart=/usr/local/lib/hermes-agent/venv/bin/python reminder_worker.py
+Restart=always
+RestartSec=10
+StartLimitBurst=10
+StartLimitIntervalSec=60
+StandardOutput=append:/var/log/hanu/reminder-worker.log
+StandardError=append:/var/log/hanu/reminder-worker.log
+
+[Install]
+WantedBy=multi-user.target

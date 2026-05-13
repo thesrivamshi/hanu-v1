@@ -1,0 +1,10 @@
+[Unit]
+Description=Periodic Hermes heartbeat tick
+
+[Timer]
+OnBootSec=30
+OnUnitActiveSec=60
+Unit=hermes-heartbeat.service
+
+[Install]
+WantedBy=timers.target

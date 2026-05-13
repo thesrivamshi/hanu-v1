@@ -1,0 +1,17 @@
+[Unit]
+Description=Hanu healthcheck endpoint (FastAPI)
+After=network.target
+
+[Service]
+Type=simple
+User=root
+EnvironmentFile=/root/.hermes/.env
+WorkingDirectory=/root/hanu-healthz
+ExecStart=/usr/local/lib/hermes-agent/venv/bin/uvicorn server:app --host 127.0.0.1 --port 8088
+Restart=always
+RestartSec=10
+StandardOutput=append:/var/log/hanu/healthz.log
+StandardError=append:/var/log/hanu/healthz.log
+
+[Install]
+WantedBy=multi-user.target
