@@ -10,20 +10,15 @@ const HANU = {
   // People list — empty until you (or Hanu) add someone via WhatsApp.
   people: [],
 
-  // 12 nav screens — static. Counts get updated by hanuLoad().
+  // 5 top-level screens after task 19 IA simplification.
+  // Goals/Reminders/Loops/Promises/Decisions live as tabs inside Memory.
+  // Family/Approvals/Conflicts live as tabs inside People.
   nav: [
-    { id: "today",     label: "Today",         icon: "sun",      group: "core",       count: 0, alert: false },
-    { id: "goals",     label: "Goals",         icon: "target",   group: "core",       count: 0 },
-    { id: "reminders", label: "Reminders",     icon: "bell",     group: "core",       count: 0 },
-    { id: "loops",     label: "Open Loops",    icon: "loop",     group: "core",       count: 0, alert: false },
-    { id: "memory",    label: "Memory Vault",  icon: "vault",    group: "knowledge",  count: 0 },
-    { id: "decisions", label: "Decision Log",  icon: "book",     group: "knowledge",  count: 0 },
-    { id: "promises",  label: "Promises",      icon: "ring",     group: "knowledge",  count: 0, alert: false },
-    { id: "reviews",   label: "Reviews",       icon: "compass",  group: "knowledge" },
-    { id: "people",    label: "People & Access", icon: "people", group: "relational", count: 0 },
-    { id: "family",    label: "Family Space",  icon: "hearth",   group: "relational" },
-    { id: "approvals", label: "Approval Queue", icon: "shield",  group: "relational", count: 0, alert: false },
-    { id: "settings",  label: "Settings",      icon: "gear",     group: "system" },
+    { id: "today",    label: "Today",    icon: "sun",     group: "core",   count: 0, alert: false },
+    { id: "memory",   label: "Memory",   icon: "vault",   group: "core",   count: 0 },
+    { id: "people",   label: "People",   icon: "people",  group: "core",   count: 0 },
+    { id: "reviews",  label: "Reviews",  icon: "compass", group: "core" },
+    { id: "settings", label: "Settings", icon: "gear",    group: "system" },
   ],
 
   goals: [],

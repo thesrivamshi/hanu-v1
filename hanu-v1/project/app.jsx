@@ -191,6 +191,77 @@ function LoginScreen() {
   );
 }
 
+// =====================================================================
+// MemoryHub + PeopleHub — task 19 IA collapse (12 → 5 screens).
+// Each hub wraps existing per-content screens behind a Tabs strip.
+// `initialTab` lets back-compat deep links (e.g. /#goals) land on the
+// right subtab.
+// =====================================================================
+
+function MemoryHub({ initialTab = "vault", ...ctx }) {
+  const [tab, setTab] = React.useState(initialTab);
+  const tabs = [
+    { value: "vault",     label: `Memory ${HANU.memories.length || ""}`.trim() },
+    { value: "goals",     label: `Goals ${HANU.goals.length || ""}`.trim() },
+    { value: "reminders", label: `Reminders ${HANU.reminders.length || ""}`.trim() },
+    { value: "loops",     label: `Loops ${HANU.loops.length || ""}`.trim() },
+    { value: "promises",  label: `Promises ${HANU.promises.length || ""}`.trim() },
+    { value: "decisions", label: `Decisions ${HANU.decisions.length || ""}`.trim() },
+  ];
+  return (
+    <div className="col gap-16">
+      <Tabs items={tabs} value={tab} onChange={setTab}/>
+      {tab === "vault"     && <MemoryScreen openMemoryDetail={ctx.openMemoryDetail}/>}
+      {tab === "goals"     && <GoalsScreen {...ctx}/>}
+      {tab === "reminders" && <RemindersScreen openCreate={ctx.openCreateReminder}/>}
+      {tab === "loops"     && <LoopsScreen/>}
+      {tab === "promises"  && <PromisesScreen/>}
+      {tab === "decisions" && <DecisionsScreen/>}
+    </div>
+  );
+}
+
+function PeopleHub({ initialTab = "people", ...ctx }) {
+  const [tab, setTab] = React.useState(initialTab);
+  const tabs = [
+    { value: "people",    label: `People ${HANU.people.length || ""}`.trim() },
+    { value: "family",    label: "Family" },
+    { value: "approvals", label: `Approvals ${HANU.approvals.length || ""}`.trim() },
+    { value: "conflicts", label: `Conflicts ${(HANU.conflicts || []).length || ""}`.trim() },
+  ];
+  return (
+    <div className="col gap-16">
+      <Tabs items={tabs} value={tab} onChange={setTab}/>
+      {tab === "people"    && <PeopleScreen {...ctx}/>}
+      {tab === "family"    && <FamilyScreen {...ctx}/>}
+      {tab === "approvals" && <ApprovalScreen openApproval={ctx.openApproval}/>}
+      {tab === "conflicts" && <ConflictsPanel/>}
+    </div>
+  );
+}
+
+// Minimal Conflicts panel (data shape: HANU.conflicts). Detailed editing UI
+// can come later; this is the at-a-glance surface.
+function ConflictsPanel() {
+  const items = HANU.conflicts || [];
+  if (!items.length) {
+    return <EmptyState title="No conflicts" body="When two people give Hanu conflicting updates about a shared task, the conflict shows up here for you to resolve." icon="shield"/>;
+  }
+  return (
+    <div className="surface">
+      <h2 className="section-title">Open conflicts <span className="count">{items.length}</span></h2>
+      <div className="col gap-12">
+        {items.map(c => (
+          <div className="approval" key={c.id}>
+            <div className="ask">{c.description}</div>
+            <div className="why">{c.target_table} · {c.target_id}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [screen, setScreen] = React.useState("today");
   const [modal, setModal] = React.useState(null); // { kind, payload }
@@ -267,20 +338,24 @@ function App() {
     tone: t.tone,
   };
 
+  // Task 19 IA: 5 top-level screens. Memory subsumes Goals/Reminders/Loops/Promises/Decisions/Vault as tabs.
+  // People subsumes Family/Approvals/Conflicts.
   const renderScreen = () => {
     switch (screen) {
       case "today":     return <TodayScreen {...ctx}/>;
-      case "goals":     return <GoalsScreen {...ctx}/>;
-      case "reminders": return <RemindersScreen openCreate={ctx.openCreateReminder}/>;
-      case "loops":     return <LoopsScreen/>;
-      case "memory":    return <MemoryScreen openMemoryDetail={ctx.openMemoryDetail}/>;
-      case "people":    return <PeopleScreen {...ctx}/>;
-      case "family":    return <FamilyScreen {...ctx}/>;
-      case "approvals": return <ApprovalScreen openApproval={ctx.openApproval}/>;
-      case "promises":  return <PromisesScreen/>;
-      case "decisions": return <DecisionsScreen/>;
+      case "memory":    return <MemoryHub {...ctx}/>;
+      case "people":    return <PeopleHub {...ctx}/>;
       case "reviews":   return <ReviewsScreen/>;
       case "settings":  return <SettingsScreen/>;
+      // Back-compat deep links from the old 12-screen IA. Land on the parent
+      // tab so old bookmarks keep working.
+      case "goals":     return <MemoryHub {...ctx} initialTab="goals"/>;
+      case "reminders": return <MemoryHub {...ctx} initialTab="reminders"/>;
+      case "loops":     return <MemoryHub {...ctx} initialTab="loops"/>;
+      case "promises":  return <MemoryHub {...ctx} initialTab="promises"/>;
+      case "decisions": return <MemoryHub {...ctx} initialTab="decisions"/>;
+      case "family":    return <PeopleHub {...ctx} initialTab="family"/>;
+      case "approvals": return <PeopleHub {...ctx} initialTab="approvals"/>;
       default:          return <TodayScreen {...ctx}/>;
     }
   };
