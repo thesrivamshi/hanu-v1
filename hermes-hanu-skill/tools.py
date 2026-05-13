@@ -65,6 +65,26 @@ def _err(msg: str) -> dict:
 # MEMORY
 # =============================================================================
 
+# memory_privacy enum (5 values after task 07). Legacy strings get coerced.
+_PRIVACY_LEGACY_MAP = {
+    "shared": "shared_with_person",
+    "shared_space": "shared_in_space",
+    "sensitive": "never_share",
+    "never": "never_share",
+}
+_VALID_PRIVACY = {"private", "ask_share", "shared_with_person", "shared_in_space", "never_share"}
+
+
+def _normalize_privacy(p: Optional[str]) -> str:
+    if not p:
+        return "private"
+    p = _PRIVACY_LEGACY_MAP.get(p, p)
+    if p not in _VALID_PRIVACY:
+        # Be conservative; default to private on unknown values rather than failing the save.
+        return "private"
+    return p
+
+
 def hanu_save_memory(
     text: str,
     kind: str = "other",
@@ -73,14 +93,18 @@ def hanu_save_memory(
     pinned: bool = False,
     shared_with_person_id: Optional[str] = None,
     shared_in_space_id: Optional[str] = None,
+    sensitive_category: Optional[str] = None,
 ) -> dict:
-    """Save a memory explicitly. Use when the user said 'remember X' or 'save this'."""
+    """Save a memory explicitly. Use when the user said 'remember X' or 'save this'.
+    privacy is one of {private, ask_share, shared_with_person, shared_in_space, never_share}.
+    sensitive_category is a free-text label like 'Health' or 'Finance' for the sensitivity facet."""
     try:
         res = sb().table("memories").insert({
             "user_id": USER_ID,
             "text": text,
             "kind": kind,
-            "privacy": privacy,
+            "privacy": _normalize_privacy(privacy),
+            "sensitive_category": sensitive_category,
             "source": source,
             "pinned": pinned,
             "shared_with_person_id": shared_with_person_id,
@@ -98,6 +122,7 @@ def hanu_propose_memory(
     suggested_kind: str = "other",
     confidence: float = 0.7,
     suggested_privacy: str = "private",
+    sensitive_category: Optional[str] = None,
 ) -> dict:
     """Add to the memory inbox. User reviews and approves later."""
     try:
@@ -106,7 +131,7 @@ def hanu_propose_memory(
             "text": text,
             "suggested_kind": suggested_kind,
             "confidence": round(confidence, 2),
-            "suggested_privacy": suggested_privacy,
+            "suggested_privacy": _normalize_privacy(suggested_privacy),
             "state": "pending",
         }).execute()
         mid = res.data[0]["id"] if res.data else None
@@ -121,12 +146,14 @@ def hanu_update_memory(
     text: Optional[str] = None,
     privacy: Optional[str] = None,
     pinned: Optional[bool] = None,
+    sensitive_category: Optional[str] = None,
 ) -> dict:
     try:
         patch: dict[str, Any] = {}
         if text is not None: patch["text"] = text
-        if privacy is not None: patch["privacy"] = privacy
+        if privacy is not None: patch["privacy"] = _normalize_privacy(privacy)
         if pinned is not None: patch["pinned"] = pinned
+        if sensitive_category is not None: patch["sensitive_category"] = sensitive_category
         if not patch:
             return _err("nothing to update")
         sb().table("memories").update(patch).eq("id", id).eq("user_id", USER_ID).execute()

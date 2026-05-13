@@ -369,16 +369,18 @@ window.hanu = {
       initials: name.split(" ").map(w => w[0]).slice(0, 2).join("").toUpperCase(),
     }).select().single();
   },
-  async saveMemory({ text, kind = "other", privacy = "private", pinned = false }) {
+  async saveMemory({ text, kind = "other", privacy = "private", pinned = false, sensitiveCategory = null }) {
     return sb.from("memories").insert({
       user_id: HANU_USER_ID, text, kind: _uiToDb(kind), privacy: _uiToDb(privacy), pinned,
+      sensitive_category: sensitiveCategory,
     }).select().single();
   },
-  async updateMemory({ id, text, privacy, pinned }) {
+  async updateMemory({ id, text, privacy, pinned, sensitiveCategory }) {
     const patch = {};
     if (text !== undefined) patch.text = text;
     if (privacy !== undefined) patch.privacy = _uiToDb(privacy);
     if (pinned !== undefined) patch.pinned = pinned;
+    if (sensitiveCategory !== undefined) patch.sensitive_category = sensitiveCategory;
     return sb.from("memories").update(patch).eq("id", id).select().single();
   },
   async forgetMemory(id) {
