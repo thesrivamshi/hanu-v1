@@ -766,6 +766,38 @@ def hanu_log_activity_freeform(
 
 
 # =============================================================================
+# ARCHIVAL (task 25)
+# =============================================================================
+
+def hanu_search_archive(query: str, limit: int = 20) -> dict:
+    """Substring search over messages_archive (cold storage). Use only when the
+    user explicitly asks about old conversations; hot path is `messages`."""
+    try:
+        res = sb().table("messages_archive").select(
+            "id,conversation_id,created_at,content"
+        ).eq("user_id", USER_ID).ilike("content", f"%{query}%").order(
+            "created_at", desc=True
+        ).limit(limit).execute()
+        return _ok(matches=res.data or [])
+    except Exception as e:
+        return _err(str(e))
+
+
+def hanu_archive_old_messages_all() -> dict:
+    """Run archive_old_messages(user_id) for every profile. Intended for a
+    monthly cron via Hermes' scheduler."""
+    try:
+        users = sb().table("profiles").select("id").execute().data or []
+        total = 0
+        for u in users:
+            r = sb().rpc("archive_old_messages", {"p_user_id": u["id"]}).execute()
+            total += (r.data or 0)
+        return _ok(moved=total)
+    except Exception as e:
+        return _err(str(e))
+
+
+# =============================================================================
 # APPROVAL RULES (task 12)
 # =============================================================================
 
@@ -954,6 +986,9 @@ _TOOL_REGISTRY = {
     # Approval rules (task 12)
     "create_approval_rule": hanu_create_approval_rule,
     "check_approval_rule": hanu_check_approval_rule,
+    # Archival (task 25)
+    "search_archive": hanu_search_archive,
+    "archive_old_messages_all": hanu_archive_old_messages_all,
     # Misc
     "record_daily_review": hanu_record_daily_review,
     "get_settings": hanu_get_settings,
