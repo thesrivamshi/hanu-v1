@@ -586,25 +586,57 @@ def hanu_check_can(person_id: str, capability: str) -> dict:
 # =============================================================================
 
 def hanu_request_approval(
-    from_person_id: str,
     question: str,
     context: str = "",
     suggested_action: str = "",
     kind: str = "question",
+    from_person_id: Optional[str] = None,
+    from_actor: str = "person",
 ) -> dict:
+    """If there's a matching active approval_rule, auto-resolve the approval
+    (state=approved or denied, resolved_at=now). Else insert as pending."""
+    if from_actor not in {"person", "hanu_self", "system"}:
+        return _err(f"from_actor must be person|hanu_self|system; got {from_actor!r}")
     try:
+        approval_state = "pending"
+        reply_text = None
+        # Consult rules only when there's a real sender.
+        if from_person_id:
+            try:
+                match = sb().rpc("match_approval_rule", {
+                    "p_from_person_id": from_person_id,
+                    "p_kind": kind,
+                    "p_text": question,
+                }).execute().data
+                rule = match[0] if match else None
+                if rule:
+                    if rule["action"] == "allow":
+                        approval_state = "approved"
+                        reply_text = rule.get("reply_template")
+                    elif rule["action"] == "deny":
+                        approval_state = "denied"
+                        reply_text = "[auto-denied by rule]"
+            except Exception:
+                # Rule lookup failure should not block the approval insert.
+                pass
+
         res = sb().table("approvals").insert({
             "user_id": USER_ID,
             "from_person_id": from_person_id,
+            "from_actor": from_actor,
             "kind": kind,
             "question": question,
             "context": context,
             "suggested_action": suggested_action,
-            "state": "pending",
+            "state": approval_state,
+            "reply_text": reply_text,
+            "resolved_at": now_iso() if approval_state != "pending" else None,
         }).execute()
         aid = res.data[0]["id"] if res.data else None
-        log_activity("approval_requested", f"From {from_person_id}: {question[:80]}", "approvals", aid)
-        return _ok(id=aid)
+        log_activity("approval_requested",
+                     f"From {from_person_id or from_actor}: {question[:80]} -> {approval_state}",
+                     "approvals", aid)
+        return _ok(id=aid, state=approval_state)
     except Exception as e:
         return _err(str(e))
 
@@ -731,6 +763,61 @@ def hanu_log_activity_freeform(
 ) -> dict:
     log_activity(kind, summary, target_table, target_id, reason, visible_to)
     return _ok()
+
+
+# =============================================================================
+# APPROVAL RULES (task 12)
+# =============================================================================
+
+def hanu_create_approval_rule(
+    action: str,
+    from_person_id: Optional[str] = None,
+    kind: Optional[str] = None,
+    text_match: Optional[str] = None,
+    reply_template: Optional[str] = None,
+    expires_at: Optional[str] = None,
+    origin_approval_id: Optional[str] = None,
+) -> dict:
+    """Persist an 'always allow' / 'always deny' rule. action ∈ {allow, deny, always_ask}.
+    text_match is an ILIKE pattern; null means match any text."""
+    if action not in {"allow", "deny", "always_ask"}:
+        return _err(f"action must be one of allow|deny|always_ask; got {action!r}")
+    try:
+        res = sb().table("approval_rules").insert({
+            "user_id": USER_ID,
+            "from_person_id": from_person_id,
+            "kind": kind,
+            "text_match": text_match,
+            "action": action,
+            "reply_template": reply_template,
+            "expires_at": expires_at,
+            "origin_approval_id": origin_approval_id,
+        }).execute()
+        rid = res.data[0]["id"] if res.data else None
+        log_activity("approval_rule_created",
+                     f"Rule: {action} kind={kind} person={from_person_id}",
+                     "approval_rules", rid)
+        return _ok(id=rid)
+    except Exception as e:
+        return _err(str(e))
+
+
+def hanu_check_approval_rule(
+    from_person_id: str,
+    kind: str,
+    text: str = "",
+) -> dict:
+    """Look up the most-specific matching active rule. Returns {matched: {id, action, reply_template}} or {matched: null}."""
+    try:
+        res = sb().rpc("match_approval_rule", {
+            "p_from_person_id": from_person_id,
+            "p_kind": kind,
+            "p_text": text,
+        }).execute()
+        row = res.data[0] if res.data else None
+        return _ok(matched=row)
+    except Exception as e:
+        return _err(str(e))
 
 
 # =============================================================================
@@ -864,6 +951,9 @@ _TOOL_REGISTRY = {
     "resolve_conflict": hanu_resolve_conflict,
     "list_open_conflicts": hanu_list_open_conflicts,
     "recent_writers": hanu_recent_writers,
+    # Approval rules (task 12)
+    "create_approval_rule": hanu_create_approval_rule,
+    "check_approval_rule": hanu_check_approval_rule,
     # Misc
     "record_daily_review": hanu_record_daily_review,
     "get_settings": hanu_get_settings,
