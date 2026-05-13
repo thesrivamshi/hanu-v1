@@ -85,11 +85,15 @@ def _normalize_privacy(p: Optional[str]) -> str:
     return p
 
 
+_VALID_SOURCE_TYPES = {"conversation", "voice_note", "approved_inbox", "pattern_detected", "manual_entry", "imported"}
+
+
 def hanu_save_memory(
     text: str,
     kind: str = "other",
     privacy: str = "private",
     source: str = "conversation",
+    source_type: str = "conversation",
     pinned: bool = False,
     shared_with_person_id: Optional[str] = None,
     shared_in_space_id: Optional[str] = None,
@@ -97,7 +101,10 @@ def hanu_save_memory(
 ) -> dict:
     """Save a memory explicitly. Use when the user said 'remember X' or 'save this'.
     privacy is one of {private, ask_share, shared_with_person, shared_in_space, never_share}.
-    sensitive_category is a free-text label like 'Health' or 'Finance' for the sensitivity facet."""
+    sensitive_category is a free-text label like 'Health' or 'Finance' for the sensitivity facet.
+    source_type is one of {conversation, voice_note, approved_inbox, pattern_detected, manual_entry, imported}."""
+    if source_type not in _VALID_SOURCE_TYPES:
+        source_type = "conversation"
     try:
         res = sb().table("memories").insert({
             "user_id": USER_ID,
@@ -106,6 +113,7 @@ def hanu_save_memory(
             "privacy": _normalize_privacy(privacy),
             "sensitive_category": sensitive_category,
             "source": source,
+            "source_type": source_type,
             "pinned": pinned,
             "shared_with_person_id": shared_with_person_id,
             "shared_in_space_id": shared_in_space_id,

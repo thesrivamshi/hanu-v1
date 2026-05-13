@@ -108,6 +108,8 @@ function shapeMemory(m) {
     type: _dbToUi(m.kind || "other"),
     privacy: _dbToUi(m.privacy || "private"),
     source: m.source || "",
+    sourceType: m.source_type || "conversation",
+    sensitiveCategory: m.sensitive_category || null,
     pinned: !!m.pinned,
   };
 }
